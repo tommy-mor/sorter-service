@@ -1,3 +1,0 @@
-[submodule "pagerank/graphit"]
-	path = pagerank/graphit
-	url = git@github.com:GraphIt-DSL/graphit.git
