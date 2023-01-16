@@ -5,6 +5,8 @@ votes have namespaces and Ids.
 everything stored in postgres database defined by mount configuration (like fulcro demo)
 can calculate multiple scoring algorithms (elo/pagerank)
 
-uses graphit to calculate. uses grpc/http/mutaja/pathom3 as port
+uses graphit to calculate. uses grpc/http/mutaja/pathom3/json-api? as port.. so many choices...
+i like pedestal, cause reify health uses it... also cognitect...
+   can put pedestal crud interceptors under a single fulcro method...
 
 TOM-553 in linear

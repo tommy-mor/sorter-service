@@ -1,0 +1,11 @@
+{:paths ["src/main" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        com.taoensso/timbre {:mvn/version "5.1.2"}
+        
+        com.wsscode/pathom3 {:mvn/version "2022.10.19-alpha"}
+        mount/mount {:mvn/version "0.1.16"}
+        org.suskalo/coffi {:mvn/version "0.5.357"}}
+
+ :aliases {:dev
+           {:jvm-opts ["--add-modules=jdk.incubator.foreign"
+                       "--enable-native-access=ALL-UNNAMED"]}}}
