@@ -1,0 +1,10 @@
+sorter as a service
+robust/CI deployed/tested sorter as a service.
+
+votes have namespaces and Ids.
+everything stored in postgres database defined by mount configuration (like fulcro demo)
+can calculate multiple scoring algorithms (elo/pagerank)
+
+uses graphit to calculate. uses grpc/http/mutaja/pathom3 as port
+
+TOM-553 in linear
