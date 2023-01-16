@@ -1,5 +1,6 @@
 graphit/build/bin:
 	git submodule init
+	git submodule update
 	sudo apt install g++ cmake make
 	cd graphit && \
 	mkdir build && \
