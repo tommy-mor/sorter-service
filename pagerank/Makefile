@@ -1,4 +1,4 @@
-graphit/build:
+graphit/build/bin:
 	git submodule init
 	sudo apt install g++ cmake make
 	cd graphit && \
@@ -8,7 +8,7 @@ graphit/build:
 	make
 	
 
-pr.a: graphit/build
+pr.a: graphit/build/bin
 	cd ./graphit/build/bin/ && \
 	python3 graphitc.py -f ./../../../pagerank.gt -o pr.cpp && \
  	g++ -std=c++14 -I ../../src/runtime_lib/ -O3 -c pr.cpp && \
