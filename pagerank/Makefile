@@ -8,7 +8,7 @@ graphit/build/bin:
 	make
 	
 
-pr.a: graphit/build/bin
+./pr.a:
 	cd ./graphit/build/bin/ && \
 	python3 graphitc.py -f ./../../../pagerank.gt -o pr.cpp && \
  	g++ -std=c++14 -I ../../src/runtime_lib/ -O3 -c pr.cpp && \

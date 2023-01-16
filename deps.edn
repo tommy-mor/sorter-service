@@ -4,8 +4,8 @@
         
         com.wsscode/pathom3 {:mvn/version "2022.10.19-alpha"}
         mount/mount {:mvn/version "0.1.16"}
-        org.suskalo/coffi {:mvn/version "0.5.357"}}
+        io.github.IGJoshua/coffi {:git/sha "2c45d8e875f4426e1631f987fb4c63b0927604eb"}}
+ 
+ :aliases {:dev {:jvm-opts ["--enable-preview" "--enable-native-access=ALL-UNNAMED"]}}}
 
- :aliases {:dev
-           {:jvm-opts ["--add-modules=jdk.incubator.foreign"
-                       "--enable-native-access=ALL-UNNAMED"]}}}
+

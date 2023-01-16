@@ -1,3 +1,5 @@
 (ns ssorter.rank
-  (:require [coffi.mem :as mem :refer [defailas]]
-            [coffi.ffi :as ffi :refer [defcfn]]))
+  (:require [coffi.mem :as mem]
+            [coffi.ffi :as ffi]))
+
+
