@@ -20,12 +20,17 @@
                               (assert (.exists loc))
                               loc)))))
 
+(defn parse-float [d]
+  (case d
+    "-nan" Double/NaN
+    (Double/parseDouble d)))
+
 (defn pagerank-file [fname]
   (->> (:out (sh (str @pr-location)
                  fname))
        (str/split-lines)
        (partition 2)
-       (map vec)
+       (map (fn [[a b]] [(parse-long a) (parse-float b)]))
        (into {})))
 
 
