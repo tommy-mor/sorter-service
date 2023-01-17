@@ -1,3 +1,3 @@
 {:tasks
-  {build
-  {:task (shell "clojure -X:deps prep")}}}
+  {test
+    {:task (shell "clojure -X:test")}}}

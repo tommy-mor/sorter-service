@@ -4,8 +4,11 @@
         
         com.wsscode/pathom3 {:mvn/version "2022.10.19-alpha"}
         mount/mount {:mvn/version "0.1.16"}
-        io.github.IGJoshua/coffi {:git/sha "2c45d8e875f4426e1631f987fb4c63b0927604eb"}}
+        
+        lambdaisland/kaocha {:mvn/version "1.73.1175"}}
  
- :aliases {:dev {:jvm-opts ["--enable-preview" "--enable-native-access=ALL-UNNAMED"]}}}
+ :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.73.1175"}}
+                  :exec-fn kaocha.runner/exec-fn
+                  :exec-args {}}}}
 
 
