@@ -57,7 +57,7 @@
 
 
 (let [votes (votes-for fruits-id)]
-  (votes->edges (items-in votes) votes))
+  (sorted (items-in votes) votes))
 
 (deftest pagerank []
   (is (= 3 3)))

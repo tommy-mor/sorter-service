@@ -31,10 +31,29 @@
 
 (defn edges->energy [edges]
   "given a lot of edges, put them into graphit and get ranks.
-   returns {idx -> float}, where idx is index/position in arg")
+   returns {idx -> float}, where idx is index/position in arg"
+  (let [tmpfile (java.io.File/createTempFile "edges" ".wel")]
+    (with-open [file (io/writer tmpfile)]
+      (binding [*out* file]
+        (doseq [[leftid rightid weight] edges]
+          (print leftid)
+          (print " ")
+          (print rightid)
+          (print " ")
+          (println weight))))
+    (let [ranks (pagerank-file (.getAbsolutePath tmpfile))]
+      (.delete tmpfile)
+      ranks)))
 
 
-(defn votes->edges [items votes]
-  (let [item->idx (into {} (map-indexed #(vector %2 %1) items))]
-    (for [{:keys [item_a item_b magnitude]} votes]
-      [(item->idx item_a) (item->idx item_b) magnitude])))
+(defn votes->edges [items->idx votes]
+  (for [{:keys [item_a item_b magnitude]} votes]
+    [(items->idx item_a) (items->idx item_b) magnitude]))
+
+(defn sorted [items votes]
+  (let [item->idx (into {} (map-indexed #(vector %2 %1) items))
+        edges (votes->edges item->idx votes)
+        energies (edges->energy edges)]
+    energies))
+
+
