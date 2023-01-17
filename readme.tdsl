@@ -1,3 +1,6 @@
+TODO
+ switch to loadig from file in graphit, then export as strings. clojure just reads strings from it
+
 sorter as a service
 robust/CI deployed/tested sorter as a service.
 

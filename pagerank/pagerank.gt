@@ -1,6 +1,6 @@
 element Vertex end
 element Edge end
-const edges : edgeset{Edge}(Vertex,Vertex);
+const edges : edgeset{Edge}(Vertex,Vertex) = load (argv[1]);
 const vertices : vertexset{Vertex};
 const cur_rank : vector{Vertex}(float);
 const ngh_sum : vector{Vertex}(float);
@@ -52,9 +52,10 @@ end
 
 const final_ranks : vector{Vertex}(float);
 
-export func pagerank_delta() -> final_ranks: vector{Vertex} (float)
+func main()
     var n : int = edges.getVertices();
     var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
+
     for i in 1:10
         #s1# edges.from(frontier).apply(updateEdge);
         var output : vertexset{Vertex};
@@ -68,6 +69,12 @@ export func pagerank_delta() -> final_ranks: vector{Vertex} (float)
     end
     delete frontier;
     final_ranks = cur_rank;
+
+	for i in 0:n
+		print i;
+		print final_ranks[i];
+	end
+
 end
 
 schedule:
