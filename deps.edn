@@ -5,7 +5,8 @@
         com.wsscode/pathom3 {:mvn/version "2022.10.19-alpha"}
         mount/mount {:mvn/version "0.1.16"}
         
-        lambdaisland/kaocha {:mvn/version "1.73.1175"}}
+        lambdaisland/kaocha {:mvn/version "1.73.1175"}
+        metosin/jsonista {:mvn/version "0.3.7"}}
  
  :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.73.1175"}}
                   :exec-fn kaocha.runner/exec-fn

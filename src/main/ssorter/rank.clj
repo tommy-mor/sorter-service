@@ -27,3 +27,14 @@
        (partition 2)
        (map vec)
        (into {})))
+
+
+(defn edges->energy [edges]
+  "given a lot of edges, put them into graphit and get ranks.
+   returns {idx -> float}, where idx is index/position in arg")
+
+
+(defn votes->edges [items votes]
+  (let [item->idx (into {} (map-indexed #(vector %2 %1) items))]
+    (for [{:keys [item_a item_b magnitude]} votes]
+      [(item->idx item_a) (item->idx item_b) magnitude])))
