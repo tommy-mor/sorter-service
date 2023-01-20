@@ -4,8 +4,10 @@ element Edge end
 const edges : edgeset{Edge}(Vertex,Vertex) = load (argv[1]);
 
 const vertices : vertexset{Vertex};
+
 const cur_rank : vector{Vertex}(float);
 const ngh_sum : vector{Vertex}(float);
+
 const delta : vector{Vertex}(float);
 const out_degree : vector {Vertex}(int);
 const damp : float = 0.85;
@@ -31,6 +33,7 @@ func updateVertex(v : Vertex) -> output : bool
    cur_rank[v] += delta[v];
    ngh_sum[v] = 0;
    output = fabs(delta[v]) > epsilon2*cur_rank[v];
+   % output = true;
 end
 
 func initVectors(v : Vertex)
@@ -39,13 +42,25 @@ func initVectors(v : Vertex)
     delta[v] = init_delta;
 end
 
+const max_degree : int;
+
+func initSelfEdges(src : Vertex, dst : Vertex)
+	   edges[src, dst] = 3;
+end
+
 
 func set_graph()
+
     vertices = edges.getVertices();
+
     cur_rank = new vector{Vertex}(float)();
     ngh_sum = new vector{Vertex}(float)();
     delta = new vector{Vertex}(float)();
     out_degree = edges.getOutDegrees();
+
+	max_degree = out_degree.max();
+	edges.apply(initSelfEdges);
+
     beta_score = (1.0 - damp) / edges.getVertices();
     init_delta = 1.0 / edges.getVertices();
     vertices.apply(initVectors);
