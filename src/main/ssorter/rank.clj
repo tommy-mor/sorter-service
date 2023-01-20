@@ -52,8 +52,12 @@
 
 
 (defn votes->edges [items->idx votes]
-  (for [{:keys [item_a item_b magnitude]} votes]
-    [(items->idx item_a) (items->idx item_b) magnitude]))
+  (->> (for [{:keys [item_a item_b magnitude]} votes]
+         (list [(items->idx item_a) (items->idx item_b) magnitude]
+               [(items->idx item_b) (items->idx item_a) (- magnitude 100)]))
+       (apply concat)
+       (concat (for [[k idx] items->idx]
+                 [idx idx 1]))))
 
 (defn sorted [items votes]
   (let [item->idx (into {} (map-indexed #(vector %2 %1) items))
