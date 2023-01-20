@@ -1,6 +1,8 @@
 element Vertex end
 element Edge end
+
 const edges : edgeset{Edge}(Vertex,Vertex) = load (argv[1]);
+
 const vertices : vertexset{Vertex};
 const cur_rank : vector{Vertex}(float);
 const ngh_sum : vector{Vertex}(float);
@@ -38,8 +40,7 @@ func initVectors(v : Vertex)
 end
 
 
-export func set_graph(edges_args: edgeset{Edge}(Vertex, Vertex))
-    edges = edges_args;
+func set_graph()
     vertices = edges.getVertices();
     cur_rank = new vector{Vertex}(float)();
     ngh_sum = new vector{Vertex}(float)();
@@ -53,6 +54,7 @@ end
 const final_ranks : vector{Vertex}(float);
 
 func main()
+	set_graph();
     var n : int = edges.getVertices();
     var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
 

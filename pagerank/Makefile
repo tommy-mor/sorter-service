@@ -16,5 +16,5 @@ graphit/build/bin:
 	mv pr ../resources/pr
 
 clean:
-	rm -f compile.o algo.gt compile.cpp
+	rm -f compile.o algo.gt compile.cpp ../pr ../resources/pr
 
