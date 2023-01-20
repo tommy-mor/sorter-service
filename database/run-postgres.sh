@@ -5,6 +5,8 @@ NAME=postgres-dev
 DOCKER_REPO=postgres
 TAG=14.1
 
+echo "{:connectstring \"postgres://postgres:password@localhost:${HOST_PORT}/postgres\"}" > config.edn
+
 docker run --rm --name $NAME \
   --volume `pwd`/pgdata:/var/lib/pgsql/data \
   --volume `pwd`/mnt_data:/mnt/data \
