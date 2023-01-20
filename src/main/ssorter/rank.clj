@@ -59,6 +59,9 @@
   (let [item->idx (into {} (map-indexed #(vector %2 %1) items))
         edges (votes->edges item->idx votes)
         energies (edges->energy edges)]
-    energies))
+    (sort-by second > (for [item items
+                            :let [idx (get item->idx item)
+                                  score (get energies idx)]]
+                        [item score]))))
 
 

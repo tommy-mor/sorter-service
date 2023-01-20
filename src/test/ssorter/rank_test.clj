@@ -53,11 +53,12 @@
 (defn items-in [votes]
   (distinct (flatten (map (juxt :item_a :item_b) votes))))
 
-{:item_a "ca0d6462-d9f8-49ac-9d39-d68fb5cfb3ce", :item_b "f70a67cd-249e-45d2-af9b-b88e3e0e0689", :user_id "c9d9d5e4-6837-44b1-b389-bebc257c698e", :magnitude 0, :tag_id "16c5f113-66cc-4514-8df0-4092a99285c0", :id "6efd80b1-d53e-47c2-b24b-73dc51dfb6d4"}
+(def winners (take 3 (let [votes (votes-for fruits-id)]
+                       (sorted (items-in votes) votes))))
 
-
-(let [votes (votes-for fruits-id)]
-  (sorted (items-in votes) votes))
+(->> items
+     (filter (comp (set (map first winners)) :id))
+     (map :name))
 
 (deftest pagerank []
   (is (= 3 3)))
