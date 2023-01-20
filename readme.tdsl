@@ -1,3 +1,9 @@
+to get started in dev
+  if you don't have docker installed, run ``database/setup-docker.sh``
+  run ``./run-postgres``
+  start a clojure repl (``M-x cider-jack-in``), eval all forms in ``./src/dev/development.clj``.
+  to reload all state when you make a change, run C-c C-r (from ``.dir-locals.el``) or equivalent bind
+
 sorter as a service
 robust/CI deployed/tested sorter as a service.
 

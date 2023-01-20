@@ -1,7 +1,7 @@
 (ns ssorter.server-components.middleware
   (:require
-   [app.server-components.config :refer [config]]
-   [app.server-components.phrag :refer [phrag]]
+   [ssorter.server-components.config :refer [config]]
+   [ssorter.server-components.phrag :refer [phrag]]
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]))
 

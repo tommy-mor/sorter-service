@@ -11,7 +11,7 @@
 
 
 (defstate config
-  :start (let [{:keys [config] :or {config "config/dev.edn"}} (args)
+  :start (let [{:keys [config] :or {config "src/main/config/dev.edn"}} (args)
                configuration (slurp config)]
            (log/info "Loaded config" configuration)
            configuration))

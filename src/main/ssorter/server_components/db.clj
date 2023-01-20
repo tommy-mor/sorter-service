@@ -15,6 +15,7 @@
 
 
 (defstate db
-  :start (let [connectstring (:db/connectstring config)]
-           (jdbc/get-connection {:connection-uri connectstring})))
-
+  :start (let [connectstring
+               (or (:db/connectstring config)
+                   (clojure.edn/read-string (slurp "database/config.edn")))]
+           (jdbc/get-connection connectstring)))
