@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Don't install PostgreSQL - Using containers for local development.</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="shortcut icon" href="/images/favicon.ico"/>
+  <link rel="stylesheet" href="https://www.perrygeo.com/theme/css/main.css" type="text/css" />
+  <link rel="stylesheet" href="https://www.perrygeo.com/fa/css/font-awesome.min.css" type="text/css" />
+  <link href="https://www.perrygeo.com/atom.xml" type="application/atom+xml" rel="alternate" title="perrygeo.com Atom Feed" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js" type="text/javascript"></script>
+</head>
+
+<body id="index" class="home">
+<div id="main">
+<div id="top-panel">
+
+  <div id="social-media-buttons">
+    <a target="_blank" href="/atom.xml">
+      <i class="fa fa-rss-square"></i></a>
+    <a target="_blank" href="https://github.com/perrygeo">
+      <i class="fa fa-github-square"></i></a>
+    <a target="_blank" href="https://linkedin.com/in/perrygeo">
+      <i class="fa fa-linkedin-square"></i></a>
+  </div>
+
+  <h1 class="title">
+    <a href="https://www.perrygeo.com/">
+      perrygeo
+    </a>
+  </h1>
+
+  <div style="float:left;">
+    <a href="/about.html">About</a>
+    |
+    <a href="/archives.html">Articles</a>
+    |
+    <a href="/cv.html">CV</a>
+  </div>
+
+</div>
+
+<div id="content-panel">
+            <aside class="featured">
+                <div class="body">
+                    <article>
+                        <h1 class="entry-title">
+                        <a href="https://www.perrygeo.com/dont-install-postgresql-using-containers-for-local-development.html">
+                          Don't install PostgreSQL - Using containers for local development.</a>
+                        </h1>
+<div class="post-info">
+    Fri 11 February 2022
+</div><!-- /.post-info -->                        <p>So you need a database for an application you're developing. You've looked around and decided that PostgreSQL fits the bill. Excellent choice! Now it's time to start coding. How do you get postgres running locally to devlop and test against it?</p>
+<p>The typical suggestion for many web application frameworks is to install PostgreSQL to your system using your chosen dependency management tool - <code>brew install postgresql</code> or <code>apt install postgresql</code> - then configure it to work for your application (maybe tweaking some settings in <code>/etc/postgresql/</code> as the root user), starting a background process with your system supervisor of choice (<code>sudo systemctl start postgresql</code>), hooking it up to your app, and you're off to the races.</p>
+<p>But what happens when you're working on project that needs a different major version of postgresql, with different extensions or entirely different settings? I often found myself in a scenario where my system was full of cruft, having been reworked many times over to swap out different postgresql instances. Additionally there is only a single data directory (<code>/etc/postgresql/&lt;version&gt;/main</code>) so if you need the data to persist for more than a single project, you have to manage backup and restore each time you switch contexts.</p>
+<p>A traditional system install just doesn't cut it. We need a way to run many different postgres instances, independent of each other with isolated data, settings and software versions. We can use Docker containers to run postgresql in a more flexible way that allows for greater experimentation, data stability, and greatly improved ease of use.</p>
+<h2>Running postgres in Docker, the naive approach</h2>
+<p>There's no real secret to running Docker containers. We know that <a href="https://hub.docker.com/_/postgres/">postgresql docker images</a> exist and we should be able to run them like any other.</p>
+<div class="highlight"><pre><span></span><code><span class="o">$</span><span class="w"> </span><span class="n">docker</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">postgres</span><span class="p">:</span><span class="mf">14.1</span><span class="w"></span>
+<span class="n">Unable</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">find</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="s1">&#39;postgres:14.1&#39;</span><span class="w"> </span><span class="n">locally</span><span class="w"></span>
+<span class="mf">14.1</span><span class="p">:</span><span class="w"> </span><span class="n">Pulling</span><span class="w"> </span><span class="n">from</span><span class="w"> </span><span class="n">library</span><span class="o">/</span><span class="n">postgres</span><span class="w"></span>
+<span class="o">...</span><span class="w"></span>
+<span class="n">Status</span><span class="p">:</span><span class="w"> </span><span class="n">Downloaded</span><span class="w"> </span><span class="n">newer</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">postgres</span><span class="p">:</span><span class="mf">14.1</span><span class="w"></span>
+<span class="n">Error</span><span class="p">:</span><span class="w"> </span><span class="n">Database</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">uninitialized</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">superuser</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">specified</span><span class="o">.</span><span class="w"></span>
+<span class="w">       </span><span class="n">You</span><span class="w"> </span><span class="n">must</span><span class="w"> </span><span class="n">specify</span><span class="w"> </span><span class="n">POSTGRES_PASSWORD</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">non</span><span class="o">-</span><span class="n">empty</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"></span>
+<span class="w">       </span><span class="n">superuser</span><span class="o">.</span><span class="w"> </span><span class="n">For</span><span class="w"> </span><span class="n">example</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;-e POSTGRES_PASSWORD=password&quot;</span><span class="w"> </span><span class="n">on</span><span class="w"> </span><span class="s2">&quot;docker run&quot;</span><span class="o">.</span><span class="w"></span>
+
+<span class="w">       </span><span class="n">You</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">also</span><span class="w"> </span><span class="n">use</span><span class="w"> </span><span class="s2">&quot;POSTGRES_HOST_AUTH_METHOD=trust&quot;</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">allow</span><span class="w"> </span><span class="n">all</span><span class="w"></span>
+<span class="w">       </span><span class="n">connections</span><span class="w"> </span><span class="n">without</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">password</span><span class="o">.</span><span class="w"> </span><span class="n">This</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="o">*</span><span class="ow">not</span><span class="o">*</span><span class="w"> </span><span class="n">recommended</span><span class="o">.</span><span class="w"></span>
+
+<span class="w">       </span><span class="n">See</span><span class="w"> </span><span class="n">PostgreSQL</span><span class="w"> </span><span class="n">documentation</span><span class="w"> </span><span class="n">about</span><span class="w"> </span><span class="s2">&quot;trust&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w">       </span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">postgresql</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">docs</span><span class="o">/</span><span class="n">current</span><span class="o">/</span><span class="n">auth</span><span class="o">-</span><span class="n">trust</span><span class="o">.</span><span class="n">html</span><span class="w"></span>
+</code></pre></div>
+
+<p>Ah, clearly there are a few tricks specific to running postgres in a container. If we set a postgres password, we can get a running postgres instance.</p>
+<div class="highlight"><pre><span></span><code>$ docker run -e <span class="nv">POSTGRES_PASSWORD</span><span class="o">=</span>password postgres:14.1
+...
+<span class="m">2022</span>-02-03 <span class="m">18</span>:23:38.823 UTC <span class="o">[</span><span class="m">1</span><span class="o">]</span> LOG:  database system is ready to accept connections
+</code></pre></div>
+
+<p>The container startup script will initialize your database, create users and start the process, listening for connections. But where is it listening? We can't yet connect to it. And where is the data? We can't see any data anywhere on our host system. Everything is, well, contained within the running Docker container.</p>
+<p>To make this workflow viable for local development, we'd like</p>
+<ul>
+<li>An open TCP port on the host system so we can connect to it.</li>
+<li>The data to live on the host system, not in the container's overlay filesystem.</li>
+<li>To give postgres access to files from the host system so that we can import datasets.</li>
+<li>Settings to live on the host system so that we can adjust them and optionally check them into source control.</li>
+</ul>
+<p>Of course the offical <a href="https://hub.docker.com/_/postgres/">PostgreSQL Docker documentation</a> covers these exact scenarios, showing us how we can use <em>port forwarding</em> and <em>volume mounts</em>.</p>
+<h1>An alternative to system-wide PostgreSQL installs</h1>
+<p>Here is my opinionated take on how to set up an ergonomic postgres environment for local development.</p>
+<p>First, create a <code>database</code> directory in your project to hold all things postgres</p>
+<p>Then create <code>database/postgresql.conf</code> to specify the postgres settings. The example below is a subset of the full postgres config, the settings that I typically need to adjust when doing any serious performance-sensistive development</p>
+<div class="highlight"><pre><span></span><code><span class="c"># PostgreSQL configuration file</span>
+<span class="c"># See https://github</span><span class="nt">.</span><span class="c">com/postgres/postgres/blob/master/src/backend/utils/misc/postgresql</span><span class="nt">.</span><span class="c">conf</span><span class="nt">.</span><span class="c">sample</span>
+
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c"># CONNECTIONS AND AUTHENTICATION</span>
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c">listen_addresses = &#39;*&#39;</span>
+<span class="c">port = 5432             # (change requires restart)</span>
+<span class="c">max_connections = 100           # (change requires restart)</span>
+
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c"># RESOURCE USAGE (except WAL)</span>
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c">shared_buffers = 2048MB         # min 128kB</span>
+<span class="c">work_mem = 40MB             # min 64kB</span>
+<span class="c">maintenance_work_mem = 640MB        # min 1MB</span>
+<span class="c">dynamic_shared_memory_type = posix  # the default is the first option</span>
+<span class="c">max_parallel_workers_per_gather = 6 # taken from max_parallel_workers</span>
+<span class="c">max_parallel_workers = 12       # maximum number of max_worker_processes that</span>
+
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c"># WRITE</span><span class="nb">-</span><span class="c">AHEAD LOG</span>
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c">checkpoint_timeout = 40min      # range 30s</span><span class="nb">-</span><span class="c">1d</span>
+<span class="c">max_wal_size = 1GB</span>
+<span class="c">min_wal_size = 80MB</span>
+<span class="c">checkpoint_completion_target = 0</span><span class="nt">.</span><span class="c">75 # checkpoint target duration</span><span class="nt">,</span><span class="c"> 0</span><span class="nt">.</span><span class="c">0 </span><span class="nb">-</span><span class="c"> 1</span><span class="nt">.</span><span class="c">0</span>
+
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c"># REPORTING AND LOGGING</span>
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c">logging_collector = off</span>
+<span class="c">log_autovacuum_min_duration = 0</span>
+<span class="c">log_checkpoints = on</span>
+<span class="c">log_connections = on</span>
+<span class="c">log_disconnections = on</span>
+<span class="c">log_error_verbosity = default</span>
+<span class="c">log_min_duration_statement = 20ms</span>
+<span class="c">log_lock_waits = on</span>
+<span class="c">log_temp_files = 0</span>
+<span class="c">log_timezone = &#39;UTC&#39;</span>
+
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c"># AUTOVACUUM</span>
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c">autovacuum_vacuum_scale_factor = 0</span><span class="nt">.</span><span class="c">02   # fraction of table size before vacuum</span>
+<span class="c">autovacuum_analyze_scale_factor = 0</span><span class="nt">.</span><span class="c">01  # fraction of table size before analyze</span>
+
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c"># CLIENT CONNECTION DEFAULTS</span>
+<span class="c">#</span><span class="nb">------------------------------------------------------------------------------</span><span class="c"></span>
+<span class="c">datestyle = &#39;iso</span><span class="nt">,</span><span class="c"> mdy&#39;</span>
+<span class="c">timezone = &#39;UTC&#39;</span>
+<span class="c">lc_messages = &#39;C</span><span class="nt">.</span><span class="c">UTF</span><span class="nb">-</span><span class="c">8&#39;</span>
+<span class="c">lc_monetary = &#39;C</span><span class="nt">.</span><span class="c">UTF</span><span class="nb">-</span><span class="c">8&#39;</span>
+<span class="c">lc_numeric = &#39;C</span><span class="nt">.</span><span class="c">UTF</span><span class="nb">-</span><span class="c">8&#39;</span>
+<span class="c">lc_time = &#39;C</span><span class="nt">.</span><span class="c">UTF</span><span class="nb">-</span><span class="c">8&#39;</span>
+<span class="c">default_text_search_config = &#39;pg_catalog</span><span class="nt">.</span><span class="c">english&#39;</span>
+<span class="c">shared_preload_libraries = &#39;pg_stat_statements&#39;</span>
+</code></pre></div>
+
+<p>Create a <code>database/pg_hba.conf</code> to control access to the database. You might need to adjust this to experiment with different networking setups, different users, etc. Usually the defaults here are fine.</p>
+<div class="highlight"><pre><span></span><code>#<span class="w"> </span><span class="nv">PostgreSQL</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="nv">Authentication</span><span class="w"> </span><span class="nv">Configuration</span><span class="w"> </span><span class="nv">File</span><span class="w"></span>
+#<span class="w"> </span><span class="o">===================================================</span><span class="w"></span>
+#<span class="w"> </span><span class="nv">TYPE</span><span class="w">  </span><span class="nv">DATABASE</span><span class="w">    </span><span class="nv">USER</span><span class="w">        </span><span class="nv">CIDR</span><span class="o">-</span><span class="nv">ADDRESS</span><span class="w">          </span><span class="nv">METHOD</span><span class="w"></span>
+
+#<span class="w"> </span><span class="nv">Database</span><span class="w"> </span><span class="nv">administrative</span><span class="w"> </span><span class="nv">login</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">UNIX</span><span class="w"> </span><span class="nv">sockets</span><span class="w"></span>
+#<span class="w"> </span><span class="s2">&quot;local&quot;</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Unix</span><span class="w"> </span><span class="nv">domain</span><span class="w"> </span><span class="nv">socket</span><span class="w"> </span><span class="nv">connections</span><span class="w"> </span><span class="nv">only</span><span class="w"></span>
+<span class="nv">local</span><span class="w">   </span><span class="nv">all</span><span class="w">         </span><span class="nv">postgres</span><span class="w">                          </span><span class="nv">ident</span><span class="w"></span>
+<span class="nv">local</span><span class="w">   </span><span class="nv">all</span><span class="w">         </span><span class="nv">all</span><span class="w">                               </span><span class="nv">ident</span><span class="w"></span>
+
+#<span class="w"> </span><span class="nv">IPv4</span><span class="w"> </span><span class="nv">local</span><span class="w"> </span><span class="nv">connections</span>:<span class="w"></span>
+<span class="nv">host</span><span class="w">    </span><span class="nv">all</span><span class="w">         </span><span class="nv">all</span><span class="w">         </span><span class="mi">172</span>.<span class="mi">17</span>.<span class="mi">0</span>.<span class="mi">0</span><span class="o">/</span><span class="mi">16</span><span class="w">         </span><span class="nv">md5</span><span class="w"></span>
+
+#<span class="w"> </span><span class="nv">IPv6</span><span class="w"> </span><span class="nv">local</span><span class="w"> </span><span class="nv">connections</span>:<span class="w"></span>
+<span class="nv">host</span><span class="w">    </span><span class="nv">all</span><span class="w">         </span><span class="nv">all</span><span class="w">         </span>::<span class="mi">1</span><span class="o">/</span><span class="mi">128</span><span class="w">               </span><span class="nv">md5</span><span class="w"></span>
+</code></pre></div>
+
+<p>Make two subdirectories to hold the data: <code>database/mnt_data</code> to hold data you intend to import/export and <code>database/pgdata</code> to hold the actual database.</p>
+<div class="highlight"><pre><span></span><code>$ mkdir mnt_data
+$ mkdir pgdata
+</code></pre></div>
+
+<p>You probably don't want to check your datasets or database into source control. Create a <code>database/.gitignore</code> to ignore them</p>
+<div class="highlight"><pre><span></span><code># .gitignore
+pgdata
+mnt_data
+</code></pre></div>
+
+<p>Finally, create a <code>run-postgres.sh</code> script to launch the docker container with everything hooked up.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># run-postgres.sh</span>
+<span class="nb">set</span> -e
+<span class="nv">HOST_PORT</span><span class="o">=</span><span class="m">5432</span>
+<span class="nv">NAME</span><span class="o">=</span>postgres-dev
+<span class="nv">DOCKER_REPO</span><span class="o">=</span>postgres
+<span class="nv">TAG</span><span class="o">=</span><span class="m">14</span>.1
+
+docker run --rm --name <span class="nv">$NAME</span> <span class="se">\</span>
+  --volume <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/pgdata:/var/lib/pgsql/data <span class="se">\</span>
+  --volume <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/mnt_data:/mnt/data <span class="se">\</span>
+  --volume <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/pg_hba.conf:/etc/postgresql/pg_hba.conf <span class="se">\</span>
+  --volume <span class="sb">`</span><span class="nb">pwd</span><span class="sb">`</span>/postgresql.conf:/etc/postgresql/postgresql.conf <span class="se">\</span>
+  -e <span class="nv">POSTGRES_PASSWORD</span><span class="o">=</span>password <span class="se">\</span>
+  -e <span class="nv">POSTGRES_USER</span><span class="o">=</span>postgres <span class="se">\</span>
+  -e <span class="nv">PGDATA</span><span class="o">=</span>/var/lib/pgsql/data/pgdata14 <span class="se">\</span>
+  -e <span class="nv">POSTGRES_INITDB_ARGS</span><span class="o">=</span><span class="s2">&quot;--data-checksums --encoding=UTF8&quot;</span> <span class="se">\</span>
+  -e <span class="nv">POSTGRES_DB</span><span class="o">=</span>db <span class="se">\</span>
+  -p <span class="si">${</span><span class="nv">HOST_PORT</span><span class="si">}</span>:5432 <span class="se">\</span>
+  <span class="si">${</span><span class="nv">DOCKER_REPO</span><span class="si">}</span>:<span class="si">${</span><span class="nv">TAG</span><span class="si">}</span> <span class="se">\</span>
+  postgres <span class="se">\</span>
+    -c <span class="s1">&#39;config_file=/etc/postgresql/postgresql.conf&#39;</span> <span class="se">\</span>
+    -c <span class="s1">&#39;hba_file=/etc/postgresql/pg_hba.conf&#39;</span>
+</code></pre></div>
+
+<p>Note the <code>HOST_PORT</code> variable. If you've already got another database running on 5432, this won't work. This is where you need to get a bit creative and tune the process to your needs. What I typically do is use port <strong>6</strong>432 and increment by one for every project so they don't conflict. This allows to run all of your databases at the same time on one machine. The only downside is you need to remember which port maps to which database!</p>
+<h2>Running it</h2>
+<div class="highlight"><pre><span></span><code>$ ./run-postgres.sh
+...
+<span class="m">2022</span>-02-03 <span class="m">19</span>:13:09.673 UTC <span class="o">[</span><span class="m">1</span><span class="o">]</span> LOG:  starting PostgreSQL <span class="m">14</span>.1 <span class="o">(</span>Debian <span class="m">14</span>.1-1.pgdg110+1<span class="o">)</span> on x86_64-pc-linux-gnu, compiled by gcc <span class="o">(</span>Debian <span class="m">10</span>.2.1-6<span class="o">)</span> <span class="m">10</span>.2.1 <span class="m">20210110</span>, <span class="m">64</span>-bit
+<span class="m">2022</span>-02-03 <span class="m">19</span>:13:09.673 UTC <span class="o">[</span><span class="m">1</span><span class="o">]</span> LOG:  listening on IPv4 address <span class="s2">&quot;0.0.0.0&quot;</span>, port <span class="m">5432</span>
+<span class="m">2022</span>-02-03 <span class="m">19</span>:13:09.673 UTC <span class="o">[</span><span class="m">1</span><span class="o">]</span> LOG:  listening on IPv6 address <span class="s2">&quot;::&quot;</span>, port <span class="m">5432</span>
+<span class="m">2022</span>-02-03 <span class="m">19</span>:13:09.677 UTC <span class="o">[</span><span class="m">1</span><span class="o">]</span> LOG:  listening on Unix socket <span class="s2">&quot;/var/run/postgresql/.s.PGSQL.5432&quot;</span>
+<span class="m">2022</span>-02-03 <span class="m">19</span>:13:09.685 UTC <span class="o">[</span><span class="m">26</span><span class="o">]</span> LOG:  database system was shut down at <span class="m">2021</span>-11-13 <span class="m">21</span>:34:06 UTC
+<span class="m">2022</span>-02-03 <span class="m">19</span>:13:09.700 UTC <span class="o">[</span><span class="m">1</span><span class="o">]</span> LOG:  database system is ready to accept connections
+</code></pre></div>
+
+<p>Using this setup, the logs are sent directly to <code>stdout</code> so you'll see everything in the terminal. The ports and paths in the logs are <em>inside</em> the container, so don't get fooled trying to find them on your host system.</p>
+<p>To connect, we use the defined host port</p>
+<div class="highlight"><pre><span></span><code>$ psql postgres://postgres:<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="760617050501190412361a1915171a1e190502">[email&#160;protected]</a>:6432/postgres
+</code></pre></div>
+
+<p>You can put data in <code>mnt_data</code> from the host system, which will be exposed to postgresql as the <code>/mnt/data</code> directory inside the container. For example, load it with psql using <code>COPY data FROM '/mnt/data/my.csv' WITH CSV HEADER;</code>. Likewise, any data dumps or exports <em>from</em> postgres can be output to this directory, immediately accessible to the host system.</p>
+<p>To stop the server, use Ctrl-C. The data will persist to your <code>pgdata</code> directory. Resist the temptation to touch any files therein as they are managemed internally to postgres. But you can move the directory as a whole around the filesystem or to another machine. It's not quite as convenient as a process-less, single file SQLite database but it's close.</p>
+<p>Because the <code>pgdata</code> directory is created by postgres which provides strong gaurantees that the on-disk
+data format will be consistent within a major version, we can even use a different image altogether to access the same underlying dataset. This can be very handy for e.g. switching between vanilla postgres and postgis,
+or for testing different versions of extensions, etc. As long as the image follows the basic rules of the postgres container behavior and uses the same major version, it should just work.</p>
+<h2>What about in production?</h2>
+<p>Installing postgresql on a VM or bare-metal server is still viable, especially if automated with configuration tools like Ansible or Chef. But there are other options.</p>
+<p>If your project is all-in on containers in production, consider checking out some of the Kubernetes operators for postgres.
+You can use the exact same container image in production that you test on locally,
+albeit with some additional operational concerns around availability
+and stateful data. Operator software like
+<a href="https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes/">Crunchy PostgreSQL for Kubernetes</a> and <a href="https://www.kubegres.io">Kubegres</a> can be configured for load balancing, high-availability, backups, monitoring, etc. which can ease the operational burden should your database require such things.</p>
+<p>Of course, there is always the cloud hosted option. I've used postgresql on both GCP Cloud SQL and AWS RDS and, while you give up some control of the environment and are no longer able to run the exact same database locally as you do in prod, the easy of adminstering these hosted databases might be worth it.</p>
+<h2>Conclusion</h2>
+<p>Docker containers provide a robust way to run postgres in local development, with very few compromises. A container-based workflow makes it easier to maintain multiple parallel database, and to move data freely between systems. For my money,
+there's no need to <code>apt install</code> postgres again.</p>
+                    </article>
+                </div>
+               <hr>
+            </aside>
+</div>
+
+<footer id="contentinfo" >
+&copy; 2005-2022 <a class="url fn" href="https://perrygeo.com">Matthew T. Perry</a>
+</footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-60116291-1']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    </script>
+
+</body>
+</html>
