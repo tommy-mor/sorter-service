@@ -1,4 +1,5 @@
-I am following this tutorial
+I am following this tutorial for managing postgres cleanly in a repo.
+   this is for dev only, as prod will use cloud managed db connectstring
 
 tutorial.html
 =
