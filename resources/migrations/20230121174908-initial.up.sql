@@ -88,4 +88,29 @@ CREATE TABLE items (
 	   CHECK (length(title) > 1)
 )
 --;;
-CREATE TABLE votes {aoietsrraietsnarst items_in_tag as well. then api key table....}
+CREATE TABLE attributes (
+	   id SERIAL PRIMARY KEY,
+	   access SERIAL REFERENCES access(id) DEFAULT NULL,
+
+	   title TEXT NOT NULL,
+	   description TEXT,
+
+	   created_at TIMESTAMP NOT NULL,
+	   edited_at TIMESTAMP NOT NULL,
+
+)
+--;;
+CREATE TABLE votes (
+	   id SERIAL PRIMARY KEY,
+	   access SERIAL REFERENCES access(id) DEFAULT NULL,
+
+	   domain_pk_namespace TEXT NOT NULL,
+	   left_item_id SERIAL REFERENCES items(id) NOT NULL,
+	   right_item_id SERIAL REFERENCES items(id) NOT NULL,
+	   magnitude integer NOT NULL CHECK (magnitude >= 0 AND magnitude <= 100),
+	   attribute SERIAL REFERENCES attributes(id) NOT NULL,
+
+	   created_at TIMESTAMP NOT NULL,
+	   edited_at TIMESTAMP NOT NULL,
+)
+--;;
