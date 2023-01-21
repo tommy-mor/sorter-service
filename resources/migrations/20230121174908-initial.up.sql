@@ -1,9 +1,6 @@
 ALTER TABLE users ADD created_at TIMESTAMP NOT NULL DEFAULT NOW();
 --;;
 
--- dokuwiki: none, read, edit, create, upload, delete
--- my drawing. can_view, can_edit
-
 -- each resource has a single access record, by default going to 0, which is private to only owner.
 -- these are acitions that that each resource has control over.
 -- for more complex actions (can_vote, can_suggest,
@@ -17,26 +14,26 @@ CREATE TABLE access (
   inherit BOOLEAN NOT NULL, -- if inherit is true, nulls defer to parent. otherwise, nulls = false
 
   -- roles/users/groups are ANDed together, only one needs to exist
-  role_id SERIAL REFERENCES roles(id),
-  user_id varchar(20) REFERENCES users(user_name),
-  group_id SERIAL REFERENCES groups(id),
 
+  -- NEXT 3 ADDED AS ALTER TABLE's
+  -- role_id SERIAL REFERENCES roles(id),
+  -- user_id varchar(20) REFERENCES users(user_name),
+  -- group_id SERIAL REFERENCES groups(id),
 
 
   owner BOOLEAN, -- can delete/change permissions/transfer owner. if its an action, owner=true means you can do the action
   can_edit BOOLEAN, 
   can_read BOOLEAN,
 
-  _and SERIAL REFERENCES access(id),
+  _and SERIAL REFERENCES access(id)
 
-  CHECK (role_id IS NOT NULL OR user_id IS NOT NULL OR group_id IS NOT NULL)
-)
+);
 --;;
 CREATE TABLE groups (
 	   id SERIAL PRIMARY KEY,
 	   access SERIAL REFERENCES access(id), -- edit access allows for changing roles and users in roles
 
-	   user_id varchar(20) REFERENCES users(user_name) NOT NULL ON DELETE CASCADE, -- also used as slug
+	   user_id varchar(20) NOT NULL REFERENCES users(user_name) ON DELETE CASCADE, -- also used as slug
 	   title TEXT NOT NULL,
 
 	   description TEXT NOT NULL,
@@ -45,7 +42,7 @@ CREATE TABLE groups (
 	   edited_at TIMESTAMP NOT NULL,
 
 	   CHECK (length(title) > 1)
-)
+);
 --;;
 CREATE TABLE roles (
 	   id SERIAL PRIMARY KEY,
@@ -54,21 +51,31 @@ CREATE TABLE roles (
 	   title TEXT NOT NULL,
 
 	   color TEXT NOT NULL,
-	   UNIQUE (group_id, title)
+	   UNIQUE (group_id, title),
 	   CHECK (length(title) > 1)
-)
+);
 --;;
+
+ALTER TABLE access
+ADD COLUMN role_id SERIAL REFERENCES roles(id),
+ADD COLUMN user_id varchar(20) REFERENCES users(user_name),
+ADD COLUMN group_id SERIAL REFERENCES groups(id);
+--;;
+ALTER TABLE access ADD CHECK (role_id IS NOT NULL OR user_id IS NOT NULL OR group_id IS NOT NULL);
+
+--;;
+
 CREATE TABLE users_in_groups (
-	   user_id varchar(20) REFERENCES users(id) NOT NULL,
+	   user_id varchar(20) REFERENCES users(user_name) NOT NULL,
 	   group_id SERIAL REFERENCES groups(id) NOT NULL,
-	   role_id SERIAL REFERENCES roles(id)
+	   role_id SERIAL REFERENCES roles(id),
 
 	   PRIMARY KEY (user_id, group_id, role_id)
 )
 --;;
 CREATE TABLE items (
 	   id SERIAL PRIMARY KEY,
-	   access SERIAL REFERENCES access(id) DEFAULT NULL, -- null = inherit -- TODO how would i do access control for things made by discord api? maybe just give access to dicsord api, answer is http call
+	   access SERIAL REFERENCES access(id), -- null = inherit -- TODO how would i do access control for things made by discord api? maybe just give access to dicsord api, answer is http call
 
 	   domain_pk_namespace TEXT NOT NULL,
 	   domain_pk TEXT NOT NULL,
@@ -84,25 +91,24 @@ CREATE TABLE items (
 	   created_at TIMESTAMP NOT NULL,
 	   edited_at TIMESTAMP NOT NULL,
 
-	   UNIQUE (domain_pk_namespace, domain_pk)
+	   UNIQUE (domain_pk_namespace, domain_pk),
 	   CHECK (length(title) > 1)
 )
 --;;
 CREATE TABLE attributes (
 	   id SERIAL PRIMARY KEY,
-	   access SERIAL REFERENCES access(id) DEFAULT NULL,
+	   access SERIAL REFERENCES access(id),
 
 	   title TEXT NOT NULL,
 	   description TEXT,
 
 	   created_at TIMESTAMP NOT NULL,
-	   edited_at TIMESTAMP NOT NULL,
-
+	   edited_at TIMESTAMP NOT NULL
 )
 --;;
 CREATE TABLE votes (
 	   id SERIAL PRIMARY KEY,
-	   access SERIAL REFERENCES access(id) DEFAULT NULL,
+	   access SERIAL REFERENCES access(id),
 
 	   domain_pk_namespace TEXT NOT NULL,
 	   left_item_id SERIAL REFERENCES items(id) NOT NULL,
@@ -111,6 +117,6 @@ CREATE TABLE votes (
 	   attribute SERIAL REFERENCES attributes(id) NOT NULL,
 
 	   created_at TIMESTAMP NOT NULL,
-	   edited_at TIMESTAMP NOT NULL,
+	   edited_at TIMESTAMP NOT NULL
 )
 --;;
