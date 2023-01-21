@@ -1,15 +1,17 @@
 to get started in dev
   if you don't have docker installed, run ``database/setup-docker.sh``
   run ``./run-postgres``
-  start a clojure repl (``M-x cider-jack-in``), eval all forms in ``./src/dev/development.clj``.
+  start a clojure repl (``M-x cider-jack-in``), make sure that you add -A:dev to the command, this is set in .dir-locals.el
   to reload all state when you make a change, run C-c C-r (from ``.dir-locals.el``) or equivalent bind
 
 sorter as a service
 robust/CI deployed/tested sorter as a service.
 
 votes have namespaces and Ids.
-everything stored in postgres database defined by mount configuration (like fulcro demo)
 can calculate multiple scoring algorithms (elo/pagerank)
+api clients don't have to store items in my server, they can just put votes, request sort with itemids as parameters.
+they can also make tags if they want, and can manipulate item_in_tag table as they please directly with api.
+or they can use items and tags and votes. 
 
 uses graphit to calculate. uses grpc/http/mutaja/pathom3/json-api? as port.. so many choices...
 i like pedestal, cause reify health uses it... also cognitect...
