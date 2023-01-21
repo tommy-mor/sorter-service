@@ -1,8 +1,9 @@
-;; ((nil (cider-clojure-cli-global-options . "-A:dev")))
+;; ((nil ))
 
 (
  (nil . 
-   ((eval . (progn
+	  ((cider-clojure-cli-global-options . "-A:dev")
+	   (eval . (progn
                (local-set-key (kbd "C-c C-r")
                  (lambda () 
                    (interactive)

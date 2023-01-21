@@ -4,10 +4,7 @@
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]
    
-   [migratus.core :as migratus]
-   [next.jdbc :as jdbc]
-   [honey.sql :as sql]
-   [honey.sql.helpers :as h]))
+   [next.jdbc :as jdbc]))
 
 
 ;; https://www.perrygeo.com/dont-install-postgresql-using-containers-for-local-development.html 
@@ -19,3 +16,5 @@
                (or (:db/connectstring config)
                    (clojure.edn/read-string (slurp "database/config.edn")))]
            (jdbc/get-connection connectstring)))
+
+

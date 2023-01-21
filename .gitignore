@@ -2,3 +2,4 @@
 .cpcache/
 pr
 .clj-kondo/*
+!.clj-kondo/
