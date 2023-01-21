@@ -13,7 +13,8 @@
         org.postgresql/postgresql {:mvn/version "42.5.1"}
         org.clojure/core.cache {:mvn/version "1.0.225"}
         
-        metosin/jsonista {:mvn/version "0.3.7"}}
+        metosin/jsonista {:mvn/version "0.3.7"}
+        crypto-password/crypto-password {:mvn/version"0.3.0"}}
  
  :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.73.1175"}}
                   :exec-fn kaocha.runner/exec-fn

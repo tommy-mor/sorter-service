@@ -2,10 +2,7 @@
   (:require
    [ssorter.server-components.db :refer [db]]
    [migratus.core :as migratus]
-   [next.jdbc :as jdbc]
-   [taoensso.timbre :as log]
-   [honey.sql :as sql]
-   [honey.sql.helpers :as h]))
+   [taoensso.timbre :as log]))
 
 (def config {:store :database
              :migration-dir "migrations/"
@@ -17,7 +14,7 @@
   (migratus/migrate config))
 
 (comment
-  (migratus/create config "items")
+  (migratus/create config "initial")
   (run))
 
 
