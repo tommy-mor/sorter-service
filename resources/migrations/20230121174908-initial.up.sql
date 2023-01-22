@@ -78,8 +78,8 @@ CREATE TABLE items (
 	   id SERIAL PRIMARY KEY,
 	   access integer REFERENCES access(id), -- null = inherit -- TODO how would i do access control for things made by discord api? maybe just give access to dicsord api, answer is http call
 
-	   domain_pk_namespace TEXT NOT NULL,
-	   domain_pk TEXT NOT NULL,
+	   domain_pk_namespace TEXT,
+	   domain_pk TEXT,
 
 
 	   title TEXT NOT NULL,
@@ -111,7 +111,7 @@ CREATE TABLE votes (
 	   id SERIAL PRIMARY KEY,
 	   access integer REFERENCES access(id),
 
-	   domain_pk_namespace TEXT NOT NULL,
+	   domain_pk_namespace TEXT, 
 	   left_item_id integer REFERENCES items(id) NOT NULL,
 	   right_item_id integer REFERENCES items(id) NOT NULL,
 	   magnitude integer NOT NULL CHECK (magnitude >= 0 AND magnitude <= 100),
