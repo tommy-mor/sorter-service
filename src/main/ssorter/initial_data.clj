@@ -15,7 +15,7 @@
 (defn exec! [m] (jdbc/execute! db (sql/format m)))
 
 (defn gather-from-json [id]
-  (def id old/fruits-id)
+  
   (exec! (-> (h/insert-into :items)
              (h/values
               (for [item (old/good-items-for id)]
@@ -29,7 +29,9 @@
                              :right_item_id (lookup right_item)
                              :magnitude magnitude
                              :access 0
-                             :attribute 0}))))))
+                             :attribute 0})))))
+  "TODO import tags"
+  "TODO make item insert idempotent (insert and look for tag)")
 
 (defn fill-database []
   (exec! (-> (h/insert-into :users)
@@ -54,4 +56,8 @@
                          :title "like"
                          :description "how much do you like something. analagous to likes on other platforms"}])
              (h/upsert (-> (h/on-conflict :id)
-                           (h/do-nothing))))))
+                           (h/do-nothing)))))
+
+  (gather-from-json old/fruits-id))
+
+(comment (fill-database))
