@@ -7,7 +7,8 @@
 
 (defn start
   "Start the web server"
-  [] (mount/start))
+  [] (mount/start)
+  }artsoierasntoiraesnt}}}A{SR}A{RSA{}RS I need to start the http server from mount somehow..., then connect the phrag ring handler (not yet made) to the main ring handler. then i want to use (a npx one-liner) graphiql to explore it})
 
 (defn stop
   "Stop the web server"
