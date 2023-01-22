@@ -4,11 +4,21 @@
    [ssorter.server-components.db :refer [db]]
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]
-   [phrag.core :as phrag]))
+   [phrag.core :as phrag]
+   [phrag.context]))
 
 (def schema
   {:tables
    [{:name "users"}]})
+
+(comment
+  (def s (phrag.context/options->config {:db {:connection db}}))
+  (phrag/schema s)
+  (def x (-> (#'phrag/root-schema s)
+             (#'phrag/update-relationships s)
+             (#'phrag/update-views s)))
+
+  schema)
 
 (defn create-phrag []
   (let [config {:db {:connection db}}

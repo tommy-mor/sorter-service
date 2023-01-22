@@ -18,7 +18,10 @@
         
         com.github.ykskb/phrag {:mvn/version "0.4.6"}
         http-kit/http-kit {:mvn/version "2.7.0-alpha1"}
-        metosin/muuntaja {:mvn/version "0.6.8"}}
+        
+        metosin/muuntaja {:mvn/version "0.6.8"}
+        metosin/reitit-core {:mvn/version "0.5.18"}
+        metosin/reitit-ring {:mvn/version "0.5.18"}}
  
  :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.73.1175"}}
                   :exec-fn kaocha.runner/exec-fn
