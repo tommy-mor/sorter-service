@@ -1,7 +1,11 @@
-(ns ssorter.model.groups)
+(ns ssorter.model.groups
+  (:require
+   [ssorter.server-components.db :refer [db]]
+   [next.jdbc :as jdbc]
+   [taoensso.timbre :as log]
+   [honey.sql :as sql]
+   [honey.sql.helpers :as h]
+   [crypto.password.bcrypt :as password]))
 
-"TODO need to consolidate my ideas about groups, put in document somewhere"
-"want there to be groups of users. for collecting votes. also group membership
-  and access control, etc"
 
-"DESIGN: users table has nullable group_id which points to group table."
+

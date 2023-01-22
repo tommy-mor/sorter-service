@@ -4,17 +4,18 @@
    [migratus.core :as migratus]
    [taoensso.timbre :as log]))
 
-(def config {:store :database
-             :migration-dir "migrations/"
-             :migration-table-name "migrations"
-             :db {:connection db}})
+(def config (fn [db] {:store :database
+                      :migration-dir "migrations/"
+                      :migration-table-name "migrations"
+                      :db {:connection db}}))
 
 (defn run []
   (log/info "running migrations")
-  (migratus/migrate config))
+  (migratus/migrate (config db)))
 
 (comment
-  (migratus/create config "initial")
+  (migratus/create (config db) "initial")
+  (migratus/rollback (config db))
   (run))
 
 
