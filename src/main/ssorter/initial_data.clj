@@ -1,6 +1,6 @@
 (ns ssorter.initial-data
   (:require
-   [ssorter.server-components.db :refer [db]]
+   [ssorter.server-components.db :refer [db exec!]]
    [next.jdbc :as jdbc]
    [taoensso.timbre :as log]
    [honey.sql :as sql]
@@ -11,8 +11,6 @@
 
 (comment (jdbc/execute! db (sql/format (-> (h/select :*)
                                            (h/from :users)))))
-
-(defn exec! [m] (jdbc/execute! db (sql/format m)))
 
 (defn gather-from-json [id]
   
