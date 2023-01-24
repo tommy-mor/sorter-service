@@ -29,26 +29,6 @@
     "-nan" Double/NaN
     (Double/parseDouble d)))
 
-(defn selfnode-file [fname]
-  (let [lines (str/split-lines (:out (sh (str @self-node-location)
-                                         fname)))
-        max_degree (parse-long (first lines))]
-    (assoc (->> lines
-                (drop 1)
-                (partition 2)
-                (map (fn [[a b]] [(parse-long a) (parse-float b)]))
-                (into {}))
-           :max_degree max_degree)))
-
-(defn pagerank-file [fname]
-  (->> (:out (sh (str @pr-location)
-                 fname))
-       (str/split-lines)
-       (partition 2)
-       (map (fn [[a b]] [(parse-long a) (parse-float b)]))
-       (into {})))
-
-
 (defn dedup-sum
   "sums edges that are between the same node @PERFORMANCE replace with something not in clojure"
   [edges]
@@ -70,11 +50,35 @@
           (println weight))))
     tmpfile))
 
+(defn selfnode [edges]
+  (let [fname (edges->tmpfile edges)
+        lines (str/split-lines (:out (sh (str @self-node-location)
+                                         (.getAbsolutePath fname))))
+        #_max_degree #_(parse-long (first lines))
+        outedges (->> lines
+                      (drop 1)
+                      (partition 2)
+                      (map (fn [[a b]] (let [node (parse-long a)] [node node (parse-long b)]))))]
+    (.delete fname)
+    outedges))
+
+
+(defn pagerank [edges]
+  (let [fname (edges->tmpfile edges)
+        ranks 
+        (->> (:out (sh (str @pr-location)
+                       (.getAbsolutePath fname)))
+             (str/split-lines)
+             (partition 2)
+             (map (fn [[a b]] [(parse-long a) (parse-float b)]))
+             (into {}))]
+    (.delete fname)
+    ranks))
+
 (defn edges->energy [edges]
   "given a lot of edges, put them into graphit and get ranks.
    returns {idx -> float}, where idx is index/position in arg"
-  (let [tmpfile (edges->tmpfile edges)
-        self-nodes (selfnode-file (.getAbsolutePath tmpfile))]
+  (let [self-nodes (selfnode edges)]
     self-nodes))
 
 

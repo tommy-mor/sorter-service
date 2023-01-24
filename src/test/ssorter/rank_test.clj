@@ -26,7 +26,7 @@
 
 (sort (sut/dedup-sum edges))
 
-(sut/edges->energy (sut/dedup-sum edges))
+(sut/pagerank (sut/edges->energy (sut/dedup-sum edges)))
 ;; with symmetric
 ;; with filtering (faster)
 ;; with commented out
