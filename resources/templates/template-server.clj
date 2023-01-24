@@ -1,5 +1,5 @@
 (ns script
-  (:require [clojure.core.match :as match]
+  (:require [clojure.core.match :refer [match]]
             [org.httpkit.server :as server]
             [babashka.pods :as pods]
             [selmer.parser :as sel]))
@@ -23,5 +23,16 @@
                                     :items fruits
                                     :votes fruit-votes}))
 
-(def server (server/run-server (fn [_] {:status 200 :body (render)}) {:port 8080}))
+(defn router [req]
+  
+  (let [paths (vec (rest (clojure.string/split (:uri req) #"/")))]
+    (match [(:request-method req) paths]
+           [:get []]
+           {:body (render)}
+           [:get ["output.css"]]
+           {:body (slurp "./output.css")}
+           
+           :else {:body "404"})))
+
+(def server (server/run-server router {:port 8080}))
 @(promise)
