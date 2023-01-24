@@ -22,12 +22,11 @@ func main()
 
 	print max_degree;
 
-
     var n : int = edges.getVertices();
 
 	for i in 0:n
 		print i;
-		print out_degree[i];
+		print max_degree - out_degree[i];
 	end
 
 end
