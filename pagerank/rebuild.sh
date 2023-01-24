@@ -1,1 +1,1 @@
-make clean && make ../resources/pr
+make clean && make ../resources/pr ../resources/self_nodes

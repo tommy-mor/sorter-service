@@ -15,6 +15,13 @@ graphit/build/bin:
 	mv pr ./../../../pr
 	mv pr ../resources/pr
 
+../resources/self_nodes:
+	cd ./graphit/build/bin/ && \
+	python3 graphitc.py -f ./../../../self_nodes.gt -o self_nodes.cpp && \
+ 	g++ -std=c++14 -fPIC -I ../../src/runtime_lib/ -O3 self_nodes.cpp -o self_nodes && \
+	mv self_nodes ./../../../self_nodes
+	mv self_nodes ../resources/self_nodes
+
 clean:
-	rm -f compile.o algo.gt compile.cpp ../pr ../resources/pr
+	rm -f ../pr ../resources/pr ../self_nodes ../resources/self_nodes
 

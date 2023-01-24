@@ -1,0 +1,25 @@
+element Vertex end
+element Edge end
+
+const edges : edgeset{Edge}(Vertex,Vertex) = load (argv[1]);
+const vertices : vertexset{Vertex};
+const out_degree : vector {Vertex}(int);
+
+func main()
+    vertices = edges.getVertices();
+    out_degree = edges.getOutDegrees();
+	var max_degree : int = out_degree.max();
+
+	print max_degree;
+
+    var n : int = edges.getVertices();
+
+	for i in 0:n
+		print i;
+		print out_degree[i];
+	end
+
+end
+
+schedule:
+    program->configApplyDirection("s1", "DensePull")->configApplyParallelization("s1","dynamic-vertex-parallel");

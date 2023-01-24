@@ -42,12 +42,6 @@ func initVectors(v : Vertex)
     delta[v] = init_delta;
 end
 
-const max_degree : int;
-
-func initSelfEdges(src : Vertex, dst : Vertex)
-	   edges[src, dst] = 3;
-end
-
 
 func set_graph()
 
@@ -58,8 +52,6 @@ func set_graph()
     delta = new vector{Vertex}(float)();
     out_degree = edges.getOutDegrees();
 
-	max_degree = out_degree.max();
-	edges.apply(initSelfEdges);
 
     beta_score = (1.0 - damp) / edges.getVertices();
     init_delta = 1.0 / edges.getVertices();
