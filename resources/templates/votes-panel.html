@@ -1,5 +1,6 @@
 <div>
   <h1> I show a list of votes </h1>
-  <div id="list" >
-  </div>
+  {% for vote in votes %}
+  {% include vote.html with vote=vote %}
+  {% endfor %}
 </div>

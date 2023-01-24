@@ -1,34 +1,27 @@
 (ns script
   (:require [clojure.core.match :as match]
             [org.httpkit.server :as server]
-            [babashka.pods :as pods]))
+            [babashka.pods :as pods]
+            [selmer.parser :as sel]))
 
 
 (pods/load-pod 'retrogradeorbit/bootleg "0.1.9")
 (def fruits (clojure.edn/read-string (slurp "fruits.edn")))
-(def fruit-votes (clojure.edn/read-string (slurp "fruit-votes.edn")))
+(def id->fruit (into {} (map (juxt :id identity) fruits)))
+(def fruit-votes (map (fn [v] (-> v
+                                  (assoc :votes/left_item (id->fruit (:left_item_id v)))
+                                  (assoc :votes/right_item (id->fruit (:right_item_id v)))))
+                      (clojure.edn/read-string (slurp "fruit-votes.edn"))))
 
-(require '[pod.retrogradeorbit.bootleg.utils :refer [convert-to]]
-         '[pod.retrogradeorbit.bootleg.enlive :refer [at content]]
-         '[pod.retrogradeorbit.bootleg.mustache :refer [mustache]])
+(sel/set-resource-path! ".")
 
-(defn load [fname]
-  (convert-to (clojure.string/trim (slurp fname)) :hiccup))
+(sel/cache-off!)
 
-(let [index-html (load "tag-page.html")
-      item-html (load "item.html")
-      vote-html (load "vote.html")
-      items-panel-html (load "items-panel.html")
-      tag-panel (load "tag-panel.html")
-      votes-panel (load "votes-panel.html")]
-  (spit "output.html"
-        (convert-to
-         (at index-html
-             [:div#tag-panel] (content tag-panel)
-             [:div#items-panel] (content items-panel-html)
-             [:div#votes-panel] (content (at votes-panel
-                                             [:div#list]
-                                             (content (map
-                                                       (fn [v] (mustache vote-html v :data :hiccup-seq))
-                                                       fruit-votes)))))
-         :html)))
+(defn render []
+  (sel/render-file "tag-index.html" {:tag {:tags/title "epic tag!!"
+                                          :tags/description "on second thought i am less epic than i thought, but still cool"}
+                                    :items fruits
+                                    :votes fruit-votes}))
+
+(def server (server/run-server (fn [_] {:status 200 :body (render)}) {:port 8080}))
+@(promise)

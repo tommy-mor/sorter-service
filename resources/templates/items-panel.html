@@ -1,6 +1,8 @@
 <div>
-  i am the items panel. i have many items in me
+  i am the items panel. i have many items in me uwu
   <ol>
-	<div id="item"/>
+	{% for item in items %}
+	{% include item.html %}
+	{% endfor %}
   </ol>
 <div>
