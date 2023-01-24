@@ -1,16 +1,27 @@
 element Vertex end
 element Edge end
 
-const edges : edgeset{Edge}(Vertex,Vertex) = load (argv[1]);
+const edges : edgeset{Edge}(Vertex,Vertex, int) = load (argv[1]);
 const vertices : vertexset{Vertex};
 const out_degree : vector {Vertex}(int);
 
+func initOutDegree(v : Vertex)
+	 out_degree[v] = 0;
+end
+	 
+func sumDegree(src : Vertex, dst: Vertex, mag : int)
+	 out_degree[src] += mag;
+end
+
 func main()
     vertices = edges.getVertices();
-    out_degree = edges.getOutDegrees();
+
+	vertices.apply(initOutDegree);
+	edges.apply(sumDegree);
 	var max_degree : int = out_degree.max();
 
 	print max_degree;
+
 
     var n : int = edges.getVertices();
 

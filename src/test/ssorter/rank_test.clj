@@ -24,7 +24,9 @@
             [3 2 1]
             [3 4 1]])
 
-(sut/edges->energy edges)
+(sort (sut/dedup-sum edges))
+
+(sut/edges->energy (sut/dedup-sum edges))
 ;; with symmetric
 ;; with filtering (faster)
 ;; with commented out

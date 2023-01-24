@@ -4,26 +4,41 @@
             [taoensso.timbre :as log]
             [clojure.string :as str]))
 
-(def pr-location (delay (let [loc (java.io.File. "./pr")]
-                          (if (.exists loc)
-                            loc
-                            (let [res (io/file (io/resource "pr"))]
-                              (assert (.exists res))
-                              
-                              (log/info "moving pr executable out of resources and into cwd")
-                              
-                              (with-open [in (io/input-stream res)
-                                          out (io/output-stream loc)]
-                                (io/copy in out))
-                              
-                              (.setExecutable loc true)
-                              (assert (.exists loc))
-                              loc)))))
+(defn confirm-location [fname]
+  (delay (let [loc (java.io.File. fname)]
+           (if (.exists loc)
+             loc
+             (let [res (io/file (io/resource fname))]
+               (assert (.exists res))
+               
+               (log/info (format "moving file %s executable out of resources and into cwd" fname))
+               
+               (with-open [in (io/input-stream res)
+                           out (io/output-stream loc)]
+                 (io/copy in out))
+               
+               (.setExecutable loc true)
+               (assert (.exists loc))
+               loc)))))
+
+(def pr-location (confirm-location "./pr"))
+(def self-node-location (confirm-location "./self_nodes"))
 
 (defn parse-float [d]
   (case d
     "-nan" Double/NaN
     (Double/parseDouble d)))
+
+(defn selfnode-file [fname]
+  (let [lines (str/split-lines (:out (sh (str @self-node-location)
+                                         fname)))
+        max_degree (parse-long (first lines))]
+    (assoc (->> lines
+                (drop 1)
+                (partition 2)
+                (map (fn [[a b]] [(parse-long a) (parse-float b)]))
+                (into {}))
+           :max_degree max_degree)))
 
 (defn pagerank-file [fname]
   (->> (:out (sh (str @pr-location)
@@ -34,10 +49,17 @@
        (into {})))
 
 
-(defn edges->energy [edges]
-  "given a lot of edges, put them into graphit and get ranks.
-   returns {idx -> float}, where idx is index/position in arg"
-  (let [tmpfile (java.io.File/createTempFile "edges" ".wel")]
+(defn dedup-sum
+  "sums edges that are between the same node @PERFORMANCE replace with something not in clojure"
+  [edges]
+  (->> edges
+       (group-by (juxt first second))
+       (reduce-kv (fn [m k v]
+                    (conj m (conj k (apply + (map last v))))) [])))
+
+(defn edges->tmpfile [edges]
+  (let [edges (dedup-sum edges)
+        tmpfile (java.io.File/createTempFile "edges" ".wel")]
     (with-open [file (io/writer tmpfile)]
       (binding [*out* file]
         (doseq [[leftid rightid weight] edges]
@@ -46,9 +68,14 @@
           (print rightid)
           (print " ")
           (println weight))))
-    (let [ranks (pagerank-file (.getAbsolutePath tmpfile))]
-      (.delete tmpfile)
-      ranks)))
+    tmpfile))
+
+(defn edges->energy [edges]
+  "given a lot of edges, put them into graphit and get ranks.
+   returns {idx -> float}, where idx is index/position in arg"
+  (let [tmpfile (edges->tmpfile edges)
+        self-nodes (selfnode-file (.getAbsolutePath tmpfile))]
+    self-nodes))
 
 
 (defn votes->edges [items->idx votes]
