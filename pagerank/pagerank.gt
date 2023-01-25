@@ -1,7 +1,9 @@
 element Vertex end
 element Edge end
 
-const edges : edgeset{Edge}(Vertex,Vertex) = load (argv[1]);
+const edges : edgeset{Edge}(Vertex,Vertex,int) = load (argv[1]);
+const outDegrees : edgeset{Edge}(Vertex,Vertex, int) = load (argv[2]);
+const out_degree : vector{Vertex}(int);
 
 const vertices : vertexset{Vertex};
 
@@ -16,7 +18,8 @@ const epsilon2 : float = 0.1;
 const epsilon : float = 0.0000001;
 const init_delta: float;
 
-func updateEdge(src : Vertex, dst : Vertex)
+func updateEdge(src : Vertex, dst : Vertex, mag : int)
+	 % TODO update this to use out_degree self edges............
     ngh_sum[dst] += delta[src]/out_degree[src];
 end
 
@@ -42,6 +45,10 @@ func initVectors(v : Vertex)
     delta[v] = init_delta;
 end
 
+func initOutDegree(src : Vertex, dst : Vertex, mag : int )
+	 out_degree[src] = mag;
+end
+
 
 func set_graph()
 
@@ -50,7 +57,8 @@ func set_graph()
     cur_rank = new vector{Vertex}(float)();
     ngh_sum = new vector{Vertex}(float)();
     delta = new vector{Vertex}(float)();
-    out_degree = edges.getOutDegrees();
+
+	edges.apply(initOutDegree);
 
 
     beta_score = (1.0 - damp) / edges.getVertices();
@@ -62,8 +70,17 @@ const final_ranks : vector{Vertex}(float);
 
 func main()
 	set_graph();
+
+	% TODO find max_out_degree (paralell max?); then remove it from self_nodes
+
     var n : int = edges.getVertices();
     var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
+
+	% for i in 0:n
+		% print "epic";
+		% print selfEdges[i][i];
+	% end
+		
 
     for i in 1:10
         #s1# edges.from(frontier).apply(updateEdge);

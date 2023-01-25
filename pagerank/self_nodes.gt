@@ -26,7 +26,7 @@ func main()
 
 	for i in 0:n
 		print i;
-		print max_degree - out_degree[i];
+		print out_degree[i];
 	end
 
 end

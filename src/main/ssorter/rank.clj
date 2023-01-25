@@ -58,20 +58,26 @@
         outedges (->> lines
                       (drop 1)
                       (partition 2)
-                      (map (fn [[a b]] (let [node (parse-long a)] [node node (parse-long b)]))))]
+                      (map (fn [[a b]] (let [node (parse-long a)]
+                                         [node 0 (parse-long b)]))))]
     (.delete fname)
     outedges))
 
 
 (defn pagerank [edges]
-  (let [fname (edges->tmpfile edges)
-        ranks 
-        (->> (:out (sh (str @pr-location)
-                       (.getAbsolutePath fname)))
+  (let [selfedgesfname (edges->tmpfile (selfnode edges))
+        fname (edges->tmpfile edges)
+        cmdout (:out (sh (str @pr-location)
+                         (.getAbsolutePath fname)
+                         (.getAbsolutePath selfedgesfname)))
+        _ (prn cmdout)
+        ranks
+        (->> cmdout
              (str/split-lines)
              (partition 2)
              (map (fn [[a b]] [(parse-long a) (parse-float b)]))
              (into {}))]
+    (.delete selfedgesfname)
     (.delete fname)
     ranks))
 
