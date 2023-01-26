@@ -22,11 +22,14 @@
             [2 4 3]
             [3 1 1]
             [3 2 1]
-            [3 4 1]])
+            [3 4 1]
+            [4 1 1]])
 
-(sort (sut/dedup-sum edges))
+;; TODO deal with things with 0 out deges (divbyzero). shouldn't happen because of encoding...
 
-(sut/pagerank (sut/selfnode edges))
+(comment (sort (sut/selfnode (sut/dedup-sum edges)))
+
+         (sut/pagerank edges))
 ;; with symmetric
 ;; with filtering (faster)
 ;; with commented out

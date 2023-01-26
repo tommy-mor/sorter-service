@@ -1,9 +1,10 @@
 element Vertex end
 element Edge end
 
-const edges : edgeset{Edge}(Vertex,Vertex,int) = load (argv[1]);
-const outDegrees : edgeset{Edge}(Vertex,Vertex, int) = load (argv[2]);
+const edges : edgeset{Edge}(Vertex, Vertex, int) = load (argv[1]);
+const outDegrees : edgeset{Edge}(Vertex, Vertex, int) = load (argv[2]);
 const out_degree : vector{Vertex}(int);
+const max_out_degree : int;
 
 const vertices : vertexset{Vertex};
 
@@ -11,7 +12,6 @@ const cur_rank : vector{Vertex}(float);
 const ngh_sum : vector{Vertex}(float);
 
 const delta : vector{Vertex}(float);
-const out_degree : vector {Vertex}(int);
 const damp : float = 0.85;
 const beta_score : float;
 const epsilon2 : float = 0.1;
@@ -20,10 +20,12 @@ const init_delta: float;
 
 func updateEdge(src : Vertex, dst : Vertex, mag : int)
 	 % TODO update this to use out_degree self edges............
-    ngh_sum[dst] += delta[src]/out_degree[src];
+    ngh_sum[dst] += (delta[src]*mag)/max_out_degree;
 end
 
 func updateVertexFirstRound(v : Vertex) -> output : bool
+   	ngh_sum[v] += (delta[v] * (max_out_degree - out_degree[v])) / max_out_degree;
+
     delta[v] = damp*(ngh_sum[v]) + beta_score;
     cur_rank[v] += delta[v];
     delta[v] = delta[v]-1.0/edges.getVertices();
@@ -32,6 +34,7 @@ func updateVertexFirstRound(v : Vertex) -> output : bool
 end
 
 func updateVertex(v : Vertex) -> output : bool
+   ngh_sum[v] += (delta[v] * (max_out_degree - out_degree[v])) / max_out_degree;
    delta[v] = ngh_sum[v]*damp;
    cur_rank[v] += delta[v];
    ngh_sum[v] = 0;
@@ -46,6 +49,9 @@ func initVectors(v : Vertex)
 end
 
 func initOutDegree(src : Vertex, dst : Vertex, mag : int )
+	 % print "epic";
+	 % print src;
+	 % print mag;
 	 out_degree[src] = mag;
 end
 
@@ -58,7 +64,9 @@ func set_graph()
     ngh_sum = new vector{Vertex}(float)();
     delta = new vector{Vertex}(float)();
 
-	edges.apply(initOutDegree);
+	outDegrees.apply(initOutDegree);
+
+	max_out_degree = out_degree.max();
 
 
     beta_score = (1.0 - damp) / edges.getVertices();

@@ -1,6 +1,4 @@
 .nrepl-port
 .cpcache/
-pr
-self_nodes
 .clj-kondo/*
 !.clj-kondo/

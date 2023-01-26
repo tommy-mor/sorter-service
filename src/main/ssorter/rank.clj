@@ -59,7 +59,7 @@
                       (drop 1)
                       (partition 2)
                       (map (fn [[a b]] (let [node (parse-long a)]
-                                         [node 0 (parse-long b)]))))]
+                                         [node (case node 0 1 0) (parse-long b)]))))]
     (.delete fname)
     outedges))
 
@@ -70,7 +70,7 @@
         cmdout (:out (sh (str @pr-location)
                          (.getAbsolutePath fname)
                          (.getAbsolutePath selfedgesfname)))
-        _ (prn cmdout)
+        _ (comment (prn cmdout))
         ranks
         (->> cmdout
              (str/split-lines)
