@@ -50,7 +50,7 @@
           (println weight))))
     tmpfile))
 
-(defn selfnode [edges]
+(defn outdegrees-as-edges [edges]
   (let [fname (edges->tmpfile edges)
         lines (str/split-lines (:out (sh (str @self-node-location)
                                          (.getAbsolutePath fname))))
@@ -65,7 +65,7 @@
 
 
 (defn pagerank [edges]
-  (let [selfedgesfname (edges->tmpfile (selfnode edges))
+  (let [selfedgesfname (edges->tmpfile (outdegrees-as-edges edges))
         fname (edges->tmpfile edges)
         cmdout (:out (sh (str @pr-location)
                          (.getAbsolutePath fname)
