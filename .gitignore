@@ -2,5 +2,7 @@
 .cpcache/
 .clj-kondo/*
 !.clj-kondo/
-./pr
-./self_nodes
+pr
+self_nodes
+!resources/pr
+!resources/self_nodes

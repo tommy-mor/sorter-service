@@ -81,27 +81,21 @@
     (.delete fname)
     ranks))
 
-(defn edges->energy [edges]
-  "given a lot of edges, put them into graphit and get ranks.
-   returns {idx -> float}, where idx is index/position in arg"
-  (let [self-nodes (selfnode edges)]
-    self-nodes))
-
-
-(defn votes->edges [items->idx votes]
-  (->> (for [{:keys [item_a item_b magnitude]} votes]
-         (list [(items->idx item_a) (items->idx item_b) magnitude]
-               [(items->idx item_b) (items->idx item_a) (- magnitude 100)]))
-       (apply concat)
-       (concat (for [[k idx] items->idx]
-                 [idx idx 1]))))
+(defn votes->edges [votes]
+  (->> (for [{:votes/keys [left_item_id right_item_id magnitude]} votes]
+         (list [left_item_id right_item_id magnitude]
+               [right_item_id left_item_id (- 100 magnitude)]))
+       (apply concat)))
 
 (defn sorted [items votes]
-  (let [item->idx (into {} (map-indexed #(vector %2 %1) items))
-        edges (votes->edges item->idx votes)
-        energies (edges->energy edges)]
+  (def items items)
+  (def votes votes)
+  (let [edges (votes->edges votes)
+        _ (def edges edges)
+        
+        energies (pagerank edges)]
     (sort-by second > (for [item items
-                            :let [idx (get item->idx item)
+                            :let [idx (:items/id item)
                                   score (get energies idx)]]
                         [item score]))))
 

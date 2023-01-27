@@ -1,6 +1,5 @@
 (ns ssorter.rank-test
   (:require [clojure.test :refer [deftest is]]
-            [jsonista.core :as j]
             [ssorter.rank :as sut]
             [clojure.java.io :as io]
             [clojure.edn]))
@@ -60,18 +59,9 @@
 
 (deftest sorted
   (let [fruits (-> "templates/fruits.edn" io/resource slurp clojure.edn/read-string)
-        fruit-votes (-> "templates/fruits.edn" io/resource slurp clojure.edn/read-string)]
-    (sut/sorted fruits fruit-votes)))
+        fruit-votes (-> "templates/fruit-votes.edn" io/resource slurp clojure.edn/read-string)]
+    (is (= ["Watermelon" "Grapes" "Banana"]
+           (->> (sut/sorted fruits fruit-votes)
+                (map (comp :items/title first))
+                (take 3))))))
 
-;; TODO deal with things with 0 out deges (divbyzero). shouldn't happen because of encoding...
-
-(comment (sort (sut/outdegrees-as-edges [[0 1 1]
-                                         [0 1 1]
-                                         [1 0 100]]))
-
-         (sut/pagerank edges))
-;; with symmetric
-;; with filtering (faster)
-;; with commented out
-(deftest pagerank []
-  (is (= 3 3)))
