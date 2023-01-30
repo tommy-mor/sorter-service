@@ -1,13 +1,16 @@
 (ns ssorter.server-components.middleware
   (:require
    [ssorter.server-components.config :refer [config]]
+   [ssorter.server-components.pathom :as pathom]
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]
    [ring.util.response :as util]
+   [com.fulcrologic.fulcro.server.api-middleware :refer [handle-api-request
+                                                         wrap-transit-params
+                                                         wrap-transit-response]]
    #_[ssorter.server-components.phrag :refer [phrag]]
    [muuntaja.middleware :as mtja]
-   [reitit.ring :as rring]
-   [clojure.java.io :as io]))
+   [reitit.ring :as rring]))
 
 (defn wrap-cors
   "add cors header to fix problem from running
@@ -21,12 +24,6 @@
         (util/header "access-control-allow-methods" "POST, GET, OPTIONS"))))
 
 
-(def ^:private not-found-handler
-  (fn [req]
-    {:status  404
-     :headers {"Content-Type" "text/plain"}
-     :body    "NOPE"}))
-
 (defn wrap-exception
   "simple exception handling, could use something like reitit.ring.middleware.exception"
   [handler]
@@ -37,8 +34,16 @@
            {:status 500
             :body (pr-str e)}))))
 
+(defn fulcro-handler [request]
+  (log/info "fulcro request for" (:body-params request))
+  (handle-api-request
+   (:body-params request)
+   (fn [tx] (pathom/parser {:ring/request request} tx))))
+
 (def router
   (rring/router [["/" {:get {:handler (constantly {:status 200 :body ":3"})}}]
+                 ["/api/v1" {:post {:handler fulcro-handler}
+                             :get {:handler (constantly {:status 200 :body "apiiii"})}}]
                  #_["/graphql" {:get {:handler (constantly
                                                 {:status 200 :body
                                                  (slurp (io/resource "templates/gql.html"))})}

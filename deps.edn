@@ -3,6 +3,8 @@
         com.taoensso/timbre {:mvn/version "5.1.2"}
         
         com.wsscode/pathom3 {:mvn/version "2022.10.19-alpha"}
+        com.fulcrologic/fulcro {:mvn/version "3.5.34"}
+
         mount/mount {:mvn/version "0.1.16"}
         
         lambdaisland/kaocha {:mvn/version "1.73.1175"}

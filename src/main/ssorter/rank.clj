@@ -88,11 +88,7 @@
        (apply concat)))
 
 (defn sorted [items votes]
-  (def items items)
-  (def votes votes)
   (let [edges (votes->edges votes)
-        _ (def edges edges)
-        
         energies (pagerank edges)]
     (sort-by second > (for [item items
                             :let [idx (:items/id item)
