@@ -24,14 +24,15 @@
     (transit/read reader)))
 
 (defn req [inp]
-  (println (transit-str inp))
+  #_(println (transit-str inp))
   (let [req @(http/request {:method :post
                             :url "http://localhost:8080/api/v1"
                             :headers {"Content-Type" "application/transit+json"
                                       "accept" "application/transit+json"}
                             :body (transit-str inp)})]
-    (println req)
-    (println (:body req))
+    #_(println req)
+    #_(println (:body req))
     (transit-read (:body req))))
 
-(req [:all-users])
+(comment (-> (req [:items])))
+(-> (req '[{(:vote {:votes/id 3}) [:votes/magnitude :votes/left_item_id]}]))

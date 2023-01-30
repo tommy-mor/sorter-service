@@ -9,6 +9,8 @@
             [com.wsscode.pathom3.plugin :as p.plugin]
             
             [ssorter.model.users :as m.users]
+            [ssorter.model.votes :as m.votes]
+            [ssorter.model.items :as m.items]
             
             [ssorter.server-components.db :refer [db]]))
 
@@ -20,7 +22,9 @@
        (log/info "pathom transaction" input)
        (resolve env input)))})
 
-(def all-resolvers [m.users/resolvers])
+(def all-resolvers [m.users/resolvers
+                    m.votes/resolvers
+                    m.items/resolvers])
 
 
 (defn build-parser []
