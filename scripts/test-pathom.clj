@@ -35,4 +35,6 @@
     (transit-read (:body req))))
 
 (comment (-> (req [:items])))
-(-> (req '[{(:vote {:votes/id 3}) [:votes/magnitude :votes/left_item_id]}]))
+(-> (req '[{(:vote {:votes/id 3}) [:votes/magnitude
+                                   {:votes/left_item [:items/id :items/title]}
+                                   {:votes/right_item [:items/id :items/title]}]}]))
