@@ -12,7 +12,7 @@
             [ssorter.model.votes :as m.votes]
             [ssorter.model.items :as m.items]
             
-            [ssorter.server-components.db :refer [db]]))
+            [clojure.walk]))
 
 (def log-resolve-plugin
   {::p.plugin/id `log-resolve-plugin
@@ -27,6 +27,13 @@
                     m.items/resolvers])
 
 
+(defn clean-exceptions "takes a pathom3 response, and looks for throwables. converts them to maps"
+  [resp]
+  (clojure.walk/postwalk #(if (instance? java.lang.Throwable %)
+                            (select-keys (Throwable->map %) [:cause :data])
+                            %)
+                         resp))
+
 (defn build-parser []
   (let [plugins [log-resolve-plugin
                  pbip/mutation-resolve-params]
@@ -36,10 +43,7 @@
                 (p.plugin/register plugins))]
     (log/info "building pathom3 parser")
     (fn parser [{:keys [ring/request] :as env'} tx]
-      (clojure.walk/postwalk #(if (instance? java.lang.Throwable %)
-                                (Throwable->map %)
-                                %)
-                             @(p.a.eql/process (merge env env') tx)))))
+      (clean-exceptions @(p.a.eql/process (merge env env') tx)))))
 
 
 (defstate parser

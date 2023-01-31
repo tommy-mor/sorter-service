@@ -2,7 +2,7 @@
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         com.taoensso/timbre {:mvn/version "5.1.2"}
         
-        com.wsscode/pathom3 {:mvn/version "2022.10.19-alpha"}
+        com.wsscode/pathom3 {:mvn/version "2023.01.31-alpha"}
         com.fulcrologic/fulcro {:mvn/version "3.5.34"}
 
         mount/mount {:mvn/version "0.1.16"}
@@ -26,7 +26,8 @@
         
         metosin/muuntaja {:mvn/version "0.6.8"}
         metosin/reitit-core {:mvn/version "0.5.18"}
-        metosin/reitit-ring {:mvn/version "0.5.18"}}
+        metosin/reitit-ring {:mvn/version "0.5.18"}
+        metosin/reitit-middleware {:mvn/version "0.5.18"}}
  
  :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.73.1175"}}
                   :exec-fn kaocha.runner/exec-fn
