@@ -50,3 +50,6 @@
   {:votes/right_item {:items/id right_item_id}})
 
 (def resolvers [votes vote vote-fields left-item right-item])
+
+(comment (comment
+           (vote-fields {} {:votes/id 1})))

@@ -4,7 +4,8 @@
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]
    [honey.sql :as sql]
-   [next.jdbc :as jdbc]))
+   [next.jdbc :as jdbc]
+   [next.jdbc.date-time]))
 
 
 ;; https://www.perrygeo.com/dont-install-postgresql-using-containers-for-local-development.html 

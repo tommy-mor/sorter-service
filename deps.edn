@@ -13,6 +13,9 @@
         migratus/migratus {:mvn/version "1.4.9"}
         
         org.postgresql/postgresql {:mvn/version "42.5.1"}
+        com.github.rawleyfowler/sluj {:mvn/version"1.0.2"}
+
+        
         org.clojure/core.cache {:mvn/version "1.0.225"}
         
         metosin/jsonista {:mvn/version "0.3.7"}
