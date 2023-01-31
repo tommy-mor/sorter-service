@@ -36,7 +36,10 @@
                 (p.plugin/register plugins))]
     (log/info "building pathom3 parser")
     (fn parser [{:keys [ring/request] :as env'} tx]
-      @(p.a.eql/process (merge env env') tx))))
+      (clojure.walk/postwalk #(if (instance? java.lang.Throwable %)
+                                (Throwable->map %)
+                                %)
+                             @(p.a.eql/process (merge env env') tx)))))
 
 
 (defstate parser
