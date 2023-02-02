@@ -11,6 +11,8 @@
             [ssorter.model.users :as m.users]
             [ssorter.model.votes :as m.votes]
             [ssorter.model.items :as m.items]
+            [ssorter.model.tags :as m.tags]
+            [ssorter.pair :as pair]
             
             [clojure.walk]))
 
@@ -19,18 +21,22 @@
    ::pcr/wrap-resolve
    (fn resolve-wrapper [resolve]
      (fn [env input]
-       (log/info "pathom transaction" input)
+       #_(log/debug "pathom transaction" input)
        (resolve env input)))})
 
 (def all-resolvers [m.users/resolvers
                     m.votes/resolvers
-                    m.items/resolvers])
+                    m.items/resolvers
+                    m.tags/resolvers
+                    pair/resolvers])
 
 
 (defn clean-exceptions "takes a pathom3 response, and looks for throwables. converts them to maps"
   [resp]
   (clojure.walk/postwalk #(if (instance? java.lang.Throwable %)
-                            (select-keys (Throwable->map %) [:cause :data])
+                            (do
+                              (log/error %)
+                              (select-keys (Throwable->map %) [:cause :data]))
                             %)
                          resp))
 
