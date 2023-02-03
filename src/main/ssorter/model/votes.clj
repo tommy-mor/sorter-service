@@ -50,7 +50,6 @@
 (pco/defresolver right-item [env {:keys [:votes/right_item_id]}]
   {:votes/right_item {:items/id right_item_id}})
 
-
 (pco/defmutation create [env {:votes/keys [attribute left_item_id
                                            right_item_id
                                            domain_pk_namespace

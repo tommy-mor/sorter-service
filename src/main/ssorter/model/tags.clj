@@ -41,6 +41,13 @@
                                     (h/from :items)
                                     (h/where [:= :domain_pk_namespace ns])))}))
 
-(def resolvers [namespaces items-in-namespace])
+(pco/defresolver votes-in-namespace [env _]
+  {::pco/output [:votes/in-namespace [:votes/id]]}
+  (let [ns (:ns (pco/params env))]
+    {:votes/in-namespace (exec! (-> (h/select :id)
+                                    (h/from :votes)
+                                    (h/where [:= :domain_pk_namespace ns])))}))
+
+(def resolvers [namespaces items-in-namespace votes-in-namespace])
 
 
