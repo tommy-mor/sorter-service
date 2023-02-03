@@ -17,8 +17,8 @@
 
 (pco/defresolver item [env _]
   {::pco/output [{:item [:items/id]}]}
-  (let [param (pco/params env)]
-    {:item {:items/id (:items/id param)}}))
+  (let [params (pco/params env)]
+    {:item {:items/id (:items/id params)}}))
 
 (pco/defresolver item-fields [env {:keys [:items/id]}]
   {::pco/output [:items/slug

@@ -20,6 +20,12 @@
     ;; TODO 
     {:tags {:items/id (:items/id param)}}))
 
+(pco/defresolver tags [env _]
+  {::pco/output [{:tags [:tags/id]}]}
+  (let [param (pco/params env)]
+    ;; TODO 
+    {:tags {:items/id (:items/id param)}}))
+
 (pco/defresolver namespaces [env _]
   {::pco/output [:namespaces]}
   {:namespaces (->> (exec! (-> (h/select-distinct :domain_pk_namespace)

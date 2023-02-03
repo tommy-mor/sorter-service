@@ -3,6 +3,7 @@
    [ssorter.server-components.db :refer [exec!]]
    [taoensso.timbre :as log]
    [honey.sql.helpers :as h]
+   [honey.sql :as hq]
    [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
    [com.wsscode.pathom3.connect.operation :as pco]))
 
@@ -12,8 +13,8 @@
 
 (pco/defresolver vote [env input]
   {::pco/output [{:vote [:votes/id]}]}
-  (let [param (pco/params env)]
-    {:vote {:votes/id (:votes/id param)}}))
+  (let [params (pco/params env)]
+    {:vote {:votes/id (:votes/id params)}}))
 
 (pco/defresolver vote-fields [env {:keys [:votes/id]}]
   {::pco/output [:votes/attribute
@@ -49,7 +50,18 @@
 (pco/defresolver right-item [env {:keys [:votes/right_item_id]}]
   {:votes/right_item {:items/id right_item_id}})
 
-(def resolvers [votes vote vote-fields left-item right-item])
+
+(pco/defmutation create [env {:votes/keys [attribute left_item_id
+                                           right_item_id
+                                           domain_pk_namespace
+                                           magnitude] :as new-vote}]
+  (assert (not= left_item_id right_item_id))
+  
+  (exec! (-> (h/insert-into :votes)
+             (h/values [new-vote])
+             (h/returning :id))))
+
+(def resolvers [votes vote vote-fields left-item right-item create])
 
 (comment (comment
            (vote-fields {} {:votes/id 1})))

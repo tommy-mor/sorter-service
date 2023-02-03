@@ -55,7 +55,7 @@
                         (handler e request))})))
 
 (defn fulcro-handler [request]
-  (log/info "fulcro request for" (:body-params request))
+  #_(log/info "fulcro request for" (:body-params request))
   (handle-api-request
    (:body-params request)
    (fn [tx] (pathom/parser {:ring/request request} tx))))

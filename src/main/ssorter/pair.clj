@@ -14,10 +14,24 @@
   (let [ids (shuffle (map :items/id coll))]
     {:pair/left_item_id (first ids) :pair/right_item_id (second ids)}))
 
-(pco/defresolver pair [env {:keys [:items/in-namespace]}]
+(pco/defresolver pair-for-namespace [env {:keys [:items/in-namespace]}]
   {::pco/output [:pair/left_item_id
                  :pair/right_item_id]}
   (pair-from-itemids in-namespace))
+
+(pco/defresolver pair-for-itemids [env _]
+  {::pco/output [{:pair/from-ids [:pair/left_item_id
+                                  :pair/right_item_id]}]}
+  
+
+  (let [{:keys [pks items/domain_pk_namespace]} (pco/params env)]
+    (def pks pks)
+    (def domain_pk_namespace domain_pk_namespace)
+    {:pair/from-ids
+     (pair-from-itemids (exec! (-> (h/select :id)
+                                   (h/from :items)
+                                   (h/where [:in :items.domain_pk (map :items/domain_pk pks)]
+                                            [:= domain_pk_namespace :items.domain_pk_namespace]))))}))
 
 (pco/defresolver pair-items [env {:keys [:pair/left_item_id
                                          :pair/right_item_id]}]
@@ -26,4 +40,6 @@
   {:pair/left {:items/id left_item_id}
    :pair/right {:items/id right_item_id}})
 
-(def resolvers [pair pair-items])
+(def resolvers [pair-for-namespace
+                pair-for-itemids
+                pair-items])
