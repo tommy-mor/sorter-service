@@ -12,6 +12,7 @@
             [ssorter.model.votes :as m.votes]
             [ssorter.model.items :as m.items]
             [ssorter.model.tags :as m.tags]
+            [ssorter.model.sorted :as m.sorted]
             [ssorter.pair :as pair]
             
             [clojure.walk]))
@@ -28,6 +29,7 @@
                     m.votes/resolvers
                     m.items/resolvers
                     m.tags/resolvers
+                    m.sorted/resolvers
                     pair/resolvers])
 
 
