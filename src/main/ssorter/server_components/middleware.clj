@@ -11,7 +11,8 @@
    [reitit.ring.middleware.exception :as exception]
    [muuntaja.core :as m]
    [muuntaja.middleware :as m.m]
-   [reitit.ring.middleware.muuntaja :as muuntaja]))
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [clojure.java.io :as io]))
 
 (defn wrap-cors
   "add cors header to fix problem from running
@@ -61,7 +62,8 @@
    (fn [tx] (pathom/parser {:ring/request request} tx))))
 
 (def router
-  (rring/router [["/" {:get {:handler (constantly {:status 200 :body ":3"})}}]
+  (rring/router [["/" {:get {:handler (constantly {:status 200 :body (slurp (io/resource "public/index.html"))})}}]
+                 ["/assets/*" (rring/create-resource-handler)]
                  ["/api/v1" {:post {:handler fulcro-handler}
                              :get {:handler (constantly {:status 200 :body "apiiii"})}}]
                  #_["/graphql" {:get {:handler (constantly

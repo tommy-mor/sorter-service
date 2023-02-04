@@ -27,12 +27,21 @@
         metosin/muuntaja {:mvn/version "0.6.8"}
         metosin/reitit-core {:mvn/version "0.5.18"}
         metosin/reitit-ring {:mvn/version "0.5.18"}
-        metosin/reitit-middleware {:mvn/version "0.5.18"}}
+        metosin/reitit-middleware {:mvn/version "0.5.18"}
+        
+        holyjak/fulcro-troubleshooting
+        {;:git/tag "latest",
+         :git/sha "c7a458f1ba3ae1f7c06e66d6d588be681c9c21c3",
+         :git/url "https://github.com/holyjak/fulcro-troubleshooting"}}
  
  :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.73.1175"}}
                   :exec-fn kaocha.runner/exec-fn
                   :exec-args {}}
            :dev {:extra-paths ["src/dev"]
-                 :extra-deps {org.clojure/tools.namespace {:mvn/version "1.3.0"}}}}}
+                 :extra-deps {org.clojure/tools.namespace {:mvn/version "1.3.0"}
+                              thheller/shadow-cljs {:mvn/version "2.20.20"}
+                              binaryage/devtools {:mvn/version "1.0.6"}
+                              cider/cider-nrepl {:mvn/version "0.30.0"},
+                              cider/piggieback {:mvn/version "0.5.3"}}}}}
 
 

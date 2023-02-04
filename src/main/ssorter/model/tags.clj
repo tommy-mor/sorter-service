@@ -36,7 +36,7 @@
 
 (pco/defresolver items-in-namespace [env _]
   {::pco/output [:items/in-namespace [:items/id]]}
-  (let [ns (:ns (pco/params env))]
+  (let [ns (:items/domain_pk_namespace (pco/params env))]
     {:items/in-namespace (exec! (-> (h/select :id)
                                     (h/from :items)
                                     (h/where [:= :domain_pk_namespace ns])))}))

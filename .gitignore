@@ -6,3 +6,10 @@ pr
 self_nodes
 !resources/pr
 !resources/self_nodes
+
+
+#js stuff
+package-lock.json
+resources/public/js
+node_modules
+.shadow-cljs/

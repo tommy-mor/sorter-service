@@ -18,3 +18,10 @@ i like pedestal, cause reify health uses it... also cognitect...
    can put pedestal crud interceptors under a single fulcro method...
 
 TOM-553 in linear
+
+
+
+frontend tutorial
+  npm install
+  npx shadow-cljs watch main (or bb jar)
+
