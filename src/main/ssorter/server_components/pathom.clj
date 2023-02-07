@@ -13,6 +13,7 @@
             [ssorter.model.items :as m.items]
             [ssorter.model.tags :as m.tags]
             [ssorter.model.sorted :as m.sorted]
+            [ssorter.model.integrations.linear :as m.i.linear]
             [ssorter.pair :as pair]
             
             [clojure.walk]))
@@ -30,7 +31,8 @@
                     m.items/resolvers
                     m.tags/resolvers
                     m.sorted/resolvers
-                    pair/resolvers])
+                    pair/resolvers
+                    m.i.linear/resolvers])
 
 
 (defn clean-exceptions "takes a pathom3 response, and looks for throwables. converts them to maps"

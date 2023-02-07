@@ -11,13 +11,23 @@
    [com.fulcrologic.fulcro.data-fetch :as df]    
    [com.fulcrologic.fulcro.dom :as dom
     :refer
-    [button div form h1 h2 h3 input label li ol p ul]]))
+    [button div form h1 h2 h3 input label li ol p ul pre]]))
 
-(defsc Linear [this props]
-  {:query []}
-  (div (p "hello from linear")))
+(defsc Issue [this props]
+  {:ident ::id
+   :query [::id ::title]}
+  (div
+   (p "linear issue")
+   (pre (pr-str props))))
 
-(def ui-linear (comp/factory Linear))
+(def ui-issue (comp/factory Issue))
+
+(defsc IssueList [this props]
+  {:ident (fn [] [:component/id :IssueList])
+   :query [{:linear/issue-list (comp/get-query Issue)}]}
+  (div
+   (p "hello from linear")
+   (map ui-issue (:linear/issue-list props))))
 
 
-
+(def ui-issue-list (comp/factory IssueList))
