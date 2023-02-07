@@ -1,6 +1,7 @@
 (ns ssorter.client.ui
   (:require 
    [ssorter.client.mutations :as mut]
+   [ssorter.model.integrations.linear :as linear]
    [com.fulcrologic.fulcro.algorithms.merge :as merge]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
@@ -14,13 +15,15 @@
   {:query [[df/marker-table :load-progress] :new-thing]}
   
   (div
-   (p "Hello from the ui/Root component!")
+   (p "Hello from the swag component")
+   (linear/ui-linear)
    
    (div {:style {:border "1px dashed", :margin "1em", :padding "1em"}}
     (p "Invoke a load! that fails and display the error:")
     (when-let [m (get props [df/marker-table :load-progress])]
       (dom/p "Progress marker: " (str m)))
-    (button {:onClick #(df/load! this :i-fail (rc/nc '[*]) {:marker :load-progress})} "I fail!"))
+    (button {:onClick #(df/load! this :i-fail (rc/nc '[*])
+                                 {:marker :load-progress})} "I fail!"))
    
    (div {:style {:border "1px dashed", :margin "1em", :padding "1em"}}
     (p "Simulate creating a new thing with server-assigned ID, leveraging Fulcro's tempid support:")

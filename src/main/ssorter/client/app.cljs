@@ -12,7 +12,7 @@
                             :com.wsscode.pathom3.connect.runner/attribute-errors))))
 
 (defonce app
-  (app/fulcro-app {:remotes {:remote (http/fulcro-http-remote {})}
+  (app/fulcro-app {:remotes {:remote (http/fulcro-http-remote {:url "/api/v1"})}
                    :global-eql-transform global-eql-transform
                    :remote-error?
                    (fn [result]
