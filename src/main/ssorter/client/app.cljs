@@ -11,8 +11,15 @@
     (update :children conj (eql/expr->ast
                             :com.wsscode.pathom3.connect.runner/attribute-errors))))
 
+(def remote (http/fulcro-http-remote {:url "/api/v1"
+                                      :request-middleware
+                                      (http/wrap-fulcro-request
+                                       (fn [req]
+                                         (assoc-in req
+                                                   [:headers "Accept"] "application/transit+json")))}))
+
 (defonce app
-  (app/fulcro-app {:remotes {:remote (http/fulcro-http-remote {:url "/api/v1"})}
+  (app/fulcro-app {:remotes {:remote remote}
                    :global-eql-transform global-eql-transform
                    :remote-error?
                    (fn [result]

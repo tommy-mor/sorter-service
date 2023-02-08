@@ -16,13 +16,14 @@
 
             [jsonista.core :as j]
             [clojure.walk :refer [prewalk]]))
+
 (def mapper
   (j/object-mapper
    {:encode-key-fn name
     :decode-key-fn keyword}))
 
 (def linear-api "https://api.linear.app/graphql")
-(def linear-key (:linear/api config))
+(def linear-key (:linear/api (clojure.edn/read-string (slurp "secrets.edn"))))
 
 (alter-var-root #'org.httpkit.client/*default-client* (fn [_] sni-client/default-client))
 
@@ -55,9 +56,18 @@
   {::pco/output [{::issues [::id
                             ::title
                             ::description]}]}
-  {::issues (-> (linear-req {:queries [[:issues {:first 10}
-                                        [[:nodes [:id :title :description :createdAt :estimate]]]]]})
-                :data :issues :nodes wrap-keywords)})
+  (let [res {::issues (-> (linear-req {:queries
+                                       [[:issues {:first 10}
+                                         [[:nodes [:id
+                                                   :title
+                                                   :description
+                                                   :createdAt
+                                                   :estimate]]]]]})
+                          :data :issues :nodes wrap-keywords)}]
+    (def x res)
+    (log/info res)
+    res))
+
 
 (comment (-> (issues) ::issues first ::id))
 
