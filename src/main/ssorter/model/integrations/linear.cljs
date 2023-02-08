@@ -23,7 +23,8 @@
 (def ui-issue (comp/factory Issue))
 
 (defsc IssueList [this props]
-  {:ident (fn [] [:component/id :IssueList])
+  {:ident (fn []  [:component/id :IssueList])
+   :initial-state {:linear/issue-list []}
    :query [{:linear/issue-list (comp/get-query Issue)}]}
   (div
    (p "hello from linear")

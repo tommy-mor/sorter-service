@@ -25,11 +25,13 @@
                    (fn [result]
                      (or
                       (app/default-remote-error? result)
-                      (:com.wsscode.pathom3.connect.runner/attribute-errors (:body result))))
+                      (not-empty
+                       (:com.wsscode.pathom3.connect.runner/attribute-errors (:body result)))))
                    
                    :global-error-action
                    (fn [{{:keys [body status-code error-text]} :result :as env}]
-                     (println "WARN: Remote call failed"
+                     (def x body)
+                     (println "WARN: Remote call failed,"
                               status-code
                               error-text
                               (:com.wsscode.pathom3.connect.runner/attribute-errors body)))}))
