@@ -15,20 +15,22 @@
 
 (defsc Issue [this props]
   {:ident ::id
-   :query [::id ::title]}
+   :query [::id ::title]
+   :initial-state {}}
   (div
    (p "linear issue")
    (pre (pr-str props))))
 
-(def ui-issue (comp/factory Issue))
+(def ui-issue (comp/factory Issue {:keyfn ::id}))
 
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
-   :initial-state {:linear/issue-list []}
-   :query [{:linear/issue-list (comp/get-query Issue)}]}
+   :initial-state {::issues []}
+   :query [{::issues (comp/get-query Issue)}]}
   (div
-   (p "hello from linear")
-   (map ui-issue (:linear/issue-list props))))
+   (p "issue-list")
+   (pre (pr-str props))
+   (map ui-issue (::issues props))))
 
 
 

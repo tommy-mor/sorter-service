@@ -15,7 +15,7 @@
 (defn load []
   (df/load! app ::linear/issues linear/Issue
             {:target (targeting/replace-at
-                      [:component/id :IssueList :linear/issue-list])}))
+                      [:component/id :IssueList ::linear/issues])}))
 
 (defn ^:export init
   "Called by shadow-cljs upon initialization, see shadow-cljs.edn"

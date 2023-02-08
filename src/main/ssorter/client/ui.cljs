@@ -14,7 +14,8 @@
 (defsc Root [this props]
   {:query [[df/marker-table :load-progress]
            :new-thing
-           {:root/issues (comp/get-query linear/IssueList)}]}
+           {:root/issues (comp/get-query linear/IssueList)}]
+   :initial-state {:root/issues {}}}
   
   (div
    (p "TODO make this have a router and semantic-navigation tabs..")

@@ -3,6 +3,7 @@
             [com.fulcrologic.fulcro.networking.http-remote :as http]
             [edn-query-language.core :as eql]))
 
+;; TODO understand this...
 (defn global-eql-transform
   [ast]
   (cond-> (app/default-global-eql-transform ast)
