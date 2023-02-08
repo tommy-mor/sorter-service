@@ -3,6 +3,7 @@
             [org.httpkit.sni-client :as sni-client]
             
             [ssorter.server-components.db :refer [exec!]]
+            [ssorter.server-components.config :refer [config]]
             [taoensso.timbre :as log]
             [honey.sql.helpers :as h]
             [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
@@ -15,14 +16,13 @@
 
             [jsonista.core :as j]
             [clojure.walk :refer [prewalk]]))
-
 (def mapper
   (j/object-mapper
    {:encode-key-fn name
     :decode-key-fn keyword}))
 
 (def linear-api "https://api.linear.app/graphql")
-(def linear-key "lin_api_TVOlDgJxL2YgAtqE4hhxxmAYxLCN3yhGFniretmi")
+(def linear-key (:linear/api config))
 
 (alter-var-root #'org.httpkit.client/*default-client* (fn [_] sni-client/default-client))
 

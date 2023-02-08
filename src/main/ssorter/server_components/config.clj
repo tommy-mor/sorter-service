@@ -1,7 +1,8 @@
 (ns ssorter.server-components.config
   (:require
     [mount.core :refer [defstate args]]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.edn]))
 
 
 (defn configure-logging! [config]
@@ -12,6 +13,9 @@
 
 (defstate config
   :start (let [{:keys [config] :or {config "src/main/config/dev.edn"}} (args)
-               configuration (slurp config)]
-           (log/info "Loaded config" configuration)
-           configuration))
+               configuration (slurp config)
+               config (merge
+                       (clojure.edn/read-string configuration)
+                       (clojure.edn/read-string (slurp "secrets.edn")))]
+           (log/info "Loaded config" config)
+           config))

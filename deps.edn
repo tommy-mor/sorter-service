@@ -28,6 +28,12 @@
         metosin/reitit-core {:mvn/version "0.5.18"}
         metosin/reitit-ring {:mvn/version "0.5.18"}
         metosin/reitit-middleware {:mvn/version "0.5.18"}
+
+
+        
+        district0x/graphql-query {:mvn/version "1.0.6"}
+
+        
         
         holyjak/fulcro-troubleshooting
         {;:git/tag "latest",
