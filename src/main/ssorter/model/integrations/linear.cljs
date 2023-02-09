@@ -19,10 +19,9 @@
   {:ident ::id
    :query [::id ::title ::createdAt]
    :initial-state {}}
-  (->>
-   [(f/ui-table-cell nil (::title props))
-    (f/ui-table-cell nil (::createdAt props))]
-   (f/ui-table-row nil)))
+  (f/ui-table-row nil
+                  (f/ui-table-cell nil (::title props))
+                  (f/ui-table-cell nil (::createdAt props))))
 
 
 (def ui-issue (comp/factory Issue {:keyfn ::id}))

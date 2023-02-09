@@ -9,7 +9,9 @@
    [com.fulcrologic.fulcro.components :as comp :refer [defsc transact!]]
    [com.fulcrologic.fulcro.raw.components :as rc]
    [com.fulcrologic.fulcro.data-fetch :as df]    
-   [com.fulcrologic.fulcro.dom :as dom :refer [button div form h1 h2 h3 input label li ol p ul]]))
+   [com.fulcrologic.fulcro.dom :as dom :refer [button div form h1 h2 h3 input label li ol p ul]]
+   
+   [com.fulcrologic.semantic-ui.factories :as f]))
 
 (defsc Root [this props]
   {:query [[df/marker-table :load-progress]
@@ -17,22 +19,11 @@
            {:root/issues (comp/get-query linear/IssueList)}]
    :initial-state {:root/issues {}}}
   
-  (div
-   (p "TODO make this have a router and semantic-navigation tabs..")
-   (dom/pre (pr-str props))
-   (linear/ui-issue-list (:root/issues props))
-   
-   #_(div {:style {:border "1px dashed", :margin "1em", :padding "1em"}}
-    (p "Invoke a load! that fails and display the error:")
-    (when-let [m (get props [df/marker-table :load-progress])]
-      (dom/p "Progress marker: " (str m)))
-    (button {:onClick #(df/load! this :i-fail (rc/nc '[*])
-                                 {:marker :load-progress})} "I fail!"))
-   
-   #_(div {:style {:border "1px dashed", :margin "1em", :padding "1em"}}
-    (p "Simulate creating a new thing with server-assigned ID, leveraging Fulcro's tempid support:")
-    (button {:onClick #(let [tmpid (tempid/tempid)]
-                         (comp/transact! this [(mut/create-random-thing {:tmpid tmpid})]))}
-            "I create!")
-    (when-let [things (:new-thing props)]
-      (p (str "Created a thing with the ID: " (first (keys things))))))))
+  (->> (f/ui-tab {:menu {:fluid true :vertical true}
+                  :panes [{:menuItem "projects"
+                           :render
+                           (comp/with-parent-context this
+                             (fn [] (linear/ui-issue-list (:root/issues props))))}
+                          {:menuItem "sorted: TOM-317" :render (fn [] (f/ui-tab-pane nil "epic2"))}]})
+       (f/ui-container nil)
+       (f/ui-segment {:style {:padding "8em 0em"} :vertical true})))
