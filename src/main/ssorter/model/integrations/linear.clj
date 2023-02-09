@@ -55,7 +55,9 @@
 (pco/defresolver issues [env _]
   {::pco/output [{::issues [::id
                             ::title
-                            ::description]}]}
+                            ::description
+                            ::createdAt
+                            ::estimate]}]}
   (let [res {::issues (-> (linear-req {:queries
                                        [[:issues {:first 10}
                                          [[:nodes [:id

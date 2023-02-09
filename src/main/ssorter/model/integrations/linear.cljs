@@ -11,15 +11,19 @@
    [com.fulcrologic.fulcro.data-fetch :as df]    
    [com.fulcrologic.fulcro.dom :as dom
     :refer
-    [button div form h1 h2 h3 input label li ol p ul pre]]))
+    [button div form h1 h2 h3 input label li ol p ul pre]]
+   
+   [com.fulcrologic.semantic-ui.factories :as f]))
 
 (defsc Issue [this props]
   {:ident ::id
-   :query [::id ::title]
+   :query [::id ::title ::createdAt]
    :initial-state {}}
-  (div
-   (p "linear issue")
-   (pre (pr-str props))))
+  (->>
+   [(f/ui-table-cell nil (::title props))
+    (f/ui-table-cell nil (::createdAt props))]
+   (f/ui-table-row nil)))
+
 
 (def ui-issue (comp/factory Issue {:keyfn ::id}))
 
@@ -27,10 +31,15 @@
   {:ident (fn []  [:component/id :IssueList])
    :initial-state {::issues []}
    :query [{::issues (comp/get-query Issue)}]}
-  (div
-   (p "issue-list")
-   (pre (pr-str props))
-   (map ui-issue (::issues props))))
+  (->> (f/ui-table {:celled true :striped true :compact true}
+                   (->> (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
+                                                     {:key "tom-315" :content "tom-315" :link true}]})
+                        (f/ui-table-header-cell {:colSpan 3})
+                        (f/ui-table-row nil)
+                        (f/ui-table-header nil))
+                   (f/ui-table-body nil
+                                    (map ui-issue (::issues props))))
+       (f/ui-container nil)))
 
 
 

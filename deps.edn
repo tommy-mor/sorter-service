@@ -4,6 +4,7 @@
         
         com.wsscode/pathom3 {:mvn/version "2023.01.31-alpha"}
         com.fulcrologic/fulcro {:mvn/version "3.5.34"}
+        com.fulcrologic/semantic-ui-wrapper {:mvn/version "2.1.4"}
 
         mount/mount {:mvn/version "0.1.16"}
         
