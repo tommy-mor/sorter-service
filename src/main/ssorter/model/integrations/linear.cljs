@@ -6,6 +6,7 @@
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
+   [com.fulcrologic.fulcro.mutations :as m]
    [com.fulcrologic.fulcro.components :as comp :refer [defsc transact!]]
    [com.fulcrologic.fulcro.raw.components :as rc]
    [com.fulcrologic.fulcro.data-fetch :as df]    
@@ -26,30 +27,44 @@
 
 (def ui-issue (comp/factory Issue {:keyfn ::id}))
 
+
+(defn load [app & [params]]
+  (df/load! app ::issues Issue
+            {:params params
+             :target (targeting/replace-at
+                      [:component/id :IssueList ::issues])}))
+
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
    :initial-state {::issues []}
    :query [{::issues (comp/get-query Issue)}]}
-  (->> (f/ui-table {:celled true :striped true :compact true}
-                   (->> (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
-                                                     {:key "tom-315" :content "tom-315" :link true}]})
-                        (f/ui-table-header-cell {:colSpan 3})
-                        (f/ui-table-row nil)
-                        (f/ui-table-header nil))
-                   (f/ui-table-body nil
-                                    (map ui-issue (::issues props)))
-                   (->>
-                    (f/ui-menu {:pagination true
-                                :size "mini"
-                                :fluid true}
-                               (f/ui-menu-item {:as "a"} "1")
-                               (f/ui-menu-item {:as "a" :active true} "2")
-                               (f/ui-menu-item {:as "a"} "3")
-                               (f/ui-menu-item {:as "a"} "4"))
-                    (f/ui-table-header-cell {:colSpan 3})
-                    (f/ui-table-row nil)
-                    (f/ui-table-footer nil)))
-       (f/ui-container nil)))
+  (def props props)
+
+  (let [left-arrow (f/ui-menu-item {:as "a"
+                                    :onClick
+                                    #(load this {:after (-> props ::issues last ::id)})} "<")
+        right-arrow
+        (f/ui-menu-item {:as "a"
+                         :onClick
+                         #(load this {:before (-> props ::issues first ::id)})} ">")]
+    (->> (f/ui-table {:celled true :striped true :compact true}
+                     (->> (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
+                                                       {:key "tom-315" :content "tom-315" :link true}]})
+                          (f/ui-table-header-cell {:colSpan 3})
+                          (f/ui-table-row nil)
+                          (f/ui-table-header nil))
+                     (f/ui-table-body nil
+                                      (map ui-issue (::issues props)))
+                     (->>
+                      (f/ui-menu {:pagination true
+                                  :size "mini"
+                                  :fluid true}
+                                 left-arrow
+                                 right-arrow)
+                      (f/ui-table-header-cell {:colSpan 3})
+                      (f/ui-table-row nil)
+                      (f/ui-table-footer nil)))
+         (f/ui-container nil))))
 
 
 

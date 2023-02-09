@@ -24,7 +24,6 @@
 
 (def linear-api "https://api.linear.app/graphql")
 (def linear-key (:linear/api (clojure.edn/read-string (slurp "secrets.edn"))))
-
 (alter-var-root #'org.httpkit.client/*default-client* (fn [_] sni-client/default-client))
 
 (defn linear-req [m & [arg]]
@@ -58,17 +57,22 @@
                             ::description
                             ::createdAt
                             ::estimate]}]}
-  (let [res {::issues (-> (linear-req {:queries
-                                       [[:issues {:first 10}
-                                         [[:nodes [:id
-                                                   :title
-                                                   :description
-                                                   :createdAt
-                                                   :estimate]]]]]})
-                          :data :issues :nodes wrap-keywords)}]
-    (def x res)
-    (log/info res)
-    res))
+  (let [{:keys [before after] :as param} (pco/params env)
+        page (cond before {:before before :last 10}
+                   after {:after after :first 10}
+                   :else {:first 10})]
+    (def page page)
+    
+    (let [req (-> (linear-req {:queries
+                               [[:issues page
+                                 [[:nodes [:id
+                                           :title
+                                           :description
+                                           :createdAt
+                                           :estimate]]]]]})
+                  :data :issues :nodes wrap-keywords)]
+      (def x req)
+      {::issues req})))
 
 
 (comment (-> (issues) ::issues first ::id))

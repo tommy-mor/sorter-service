@@ -12,11 +12,6 @@
    
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]))
 
-(defn load []
-  (df/load! app ::linear/issues linear/Issue
-            {:target (targeting/replace-at
-                      [:component/id :IssueList ::linear/issues])}))
-
 (defn ^:export init
   "Called by shadow-cljs upon initialization, see shadow-cljs.edn"
   []
@@ -27,7 +22,7 @@
               (app/root-class app)
               "app"
               {:initialize-state? false})
-  (load))
+  (linear/load app))
 
 (defn ^:export refresh
   "Called by shadow-cljs upon initialization, see shadow-cljs.edn"
@@ -35,7 +30,7 @@
   (println "refreshing app...")
   (comp/refresh-dynamic-queries! app)
   (app/mount! app (app/root-class app) "app")
-  (load))
+  (linear/load app))
 
 
 
