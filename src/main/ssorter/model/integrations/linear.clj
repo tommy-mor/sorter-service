@@ -57,21 +57,29 @@
                             ::description
                             ::createdAt
                             ::estimate
-                            ::priorityLabel]}]}
-  (let [{:keys [before after] :as param} (pco/params env)
-        page (cond before {:before before :last 10}
+                            ::priorityLabel
+                            ::children]}]}
+  (let [{:keys [before after onlyParents?] :as param} (pco/params env)
+        params (cond before {:before before :last 10}
                    after {:after after :first 10}
-                   :else {:first 10})]
+                   :else {:first 10})
+
+        params (merge params
+                      (if onlyParents?
+                        {:filter {:children {:length {:gt 0.0}}}}
+                        {}))
+        ]
     (def page page)
     
     (let [req (-> (linear-req {:queries
-                               [[:issues page
+                               [[:issues params
                                  [[:nodes [:id
                                            :title
                                            :description
                                            :createdAt
                                            :priorityLabel
-                                           :estimate]]]]]})
+                                           :estimate
+                                           [:children [[:nodes [:id]]]]]]]]]})
                   :data :issues :nodes wrap-keywords)]
       (def x req)
       {::issues (if before (reverse req) req)})))
