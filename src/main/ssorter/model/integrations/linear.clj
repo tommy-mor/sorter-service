@@ -58,7 +58,8 @@
                             ::createdAt
                             ::estimate
                             ::priorityLabel
-                            ::children]}]}
+                            ::children
+                            ::identifier]}]}
   (let [{:keys [before after onlyParents?] :as param} (pco/params env)
         params (cond before {:before before :last 10}
                    after {:after after :first 10}
@@ -79,6 +80,7 @@
                                            :createdAt
                                            :priorityLabel
                                            :estimate
+                                           :identifier
                                            [:children [[:nodes [:id]]]]]]]]]})
                   :data :issues :nodes wrap-keywords)]
       (def x req)

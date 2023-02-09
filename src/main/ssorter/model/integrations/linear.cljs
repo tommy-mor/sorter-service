@@ -19,10 +19,12 @@
 
 (defsc Issue [this props]
   {:ident ::id
-   :query [::id ::title ::createdAt ::priorityLabel ::children]
+   :query [::id ::title ::createdAt ::priorityLabel ::children ::identifier]
    :initial-state {}}
   (let [opts {:singleLine true}]
     (f/ui-table-row nil
+                    (f/ui-table-cell opts (dom/a {:onClick #(js/alert "swag")
+                                                  :href "#"} (::identifier props)))
                     (f/ui-table-cell opts (::title props))
                     (f/ui-table-cell opts (pr-str (-> props ::children ::nodes count)))
                     (f/ui-table-cell opts (datetime (::createdAt props)))
@@ -60,7 +62,7 @@
     (->> (f/ui-table {:celled true :striped true :compact true}
                      (->> (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
                                                        {:key "tom-315" :content "tom-315" :link true}]})
-                          (f/ui-table-header-cell {:colSpan 4} (f/ui-loader {:active spinner}))
+                          (f/ui-table-header-cell {:colSpan 100} (f/ui-loader {:active spinner}))
                           (f/ui-table-row nil)
                           (f/ui-table-header nil))
                      (f/ui-table-body nil
@@ -71,7 +73,7 @@
                                   :fluid true}
                                  left-arrow
                                  right-arrow)
-                      (f/ui-table-header-cell {:colSpan 4})
+                      (f/ui-table-header-cell {:colSpan 100})
                       (f/ui-table-row nil)
                       (f/ui-table-footer nil)))
          (f/ui-container nil))))
