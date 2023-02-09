@@ -20,7 +20,7 @@
    :initial-state {:root/issues {}}}
   
   (->> (f/ui-tab {:menu {:fluid true :vertical true}
-                  :panes [{:menuItem "projects"
+                  :panes [{:menuItem "linear/issues"
                            :render
                            (fn [] (comp/with-parent-context this
                                     (linear/ui-issue-list (:root/issues props))))}

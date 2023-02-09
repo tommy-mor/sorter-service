@@ -17,13 +17,18 @@
    [com.fulcrologic.semantic-ui.factories :as f]
    [clojure.contrib.humanize :refer [datetime]]))
 
+(m/defmutation start-sorting-issue [params]
+  (action [_] (println "running.."))
+  (remote [env] true))
+
 (defsc Issue [this props]
   {:ident ::id
    :query [::id ::title ::createdAt ::priorityLabel ::children ::identifier]
    :initial-state {}}
   (let [opts {:singleLine true}]
     (f/ui-table-row nil
-                    (f/ui-table-cell opts (dom/a {:onClick #(js/alert "swag")
+                    (f/ui-table-cell opts (dom/a {:onClick #(if (js/confirm "sort this issue?")
+                                                              (transact! this [(start-sorting-issue {:id 3})]))
                                                   :href "#"} (::identifier props)))
                     (f/ui-table-cell opts (::title props))
                     (f/ui-table-cell opts (pr-str (-> props ::children ::nodes count)))

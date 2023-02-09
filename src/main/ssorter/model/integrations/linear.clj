@@ -51,6 +51,11 @@
 
 (comment (wrap-keywords {:x/x 4}))
 
+(pco/defmutation start-sorting-issue [params]
+  (def y params)
+  (log/info "start sorting an issue" params)
+  {:done true})
+
 (pco/defresolver issues [env _]
   {::pco/output [{::issues [::id
                             ::title
@@ -89,7 +94,7 @@
 
 (comment (-> (issues) ::issues first ::id))
 
-(def resolvers [issues])
+(def resolvers [issues start-sorting-issue])
 
 
 
