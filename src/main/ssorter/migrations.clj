@@ -14,7 +14,7 @@
   (migratus/migrate (config db)))
 
 (comment
-  (migratus/create (config db) "initial")
+  (migratus/create (config db) "tags")
   (migratus/rollback (config db))
   (run))
 

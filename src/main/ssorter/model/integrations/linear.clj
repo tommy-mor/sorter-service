@@ -53,6 +53,8 @@
 
 (pco/defmutation start-sorting-issue [params]
   (def y params)
+  "make a tag"
+  "add current subissues to the tag"
   (log/info "start sorting an issue" params)
   {:done true})
 
