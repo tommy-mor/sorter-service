@@ -22,8 +22,8 @@
   (->> (f/ui-tab {:menu {:fluid true :vertical true}
                   :panes [{:menuItem "projects"
                            :render
-                           (comp/with-parent-context this
-                             (fn [] (linear/ui-issue-list (:root/issues props))))}
+                           (fn [] (comp/with-parent-context this
+                                    (linear/ui-issue-list (:root/issues props))))}
                           {:menuItem "sorted: TOM-317" :render (fn [] (f/ui-tab-pane nil "epic2"))}]})
        (f/ui-container nil)
        (f/ui-segment {:style {:padding "8em 0em"} :vertical true})))
