@@ -12,19 +12,52 @@
    [sluj.core :refer [sluj]]))
 
 
-(defn method [])
-
 (pco/defresolver tags [env _]
   {::pco/output [{:tags [:tags/id]}]}
   (let [param (pco/params env)]
-    ;; TODO 
-    {:tags {:items/id (:items/id param)}}))
+    {:tags (exec! (-> (h/select :id)
+                      (h/from :tags)))}))
 
-(pco/defresolver tags [env _]
-  {::pco/output [{:tags [:tags/id]}]}
-  (let [param (pco/params env)]
-    ;; TODO 
-    {:tags {:items/id (:items/id param)}}))
+(pco/defresolver tag [env {:keys [tags/id]}]
+  {::pco/input [:tags/id]}
+  {::pco/output [:tags/title :tags/description]}
+  (first (exec! (-> (h/select :*)
+                    (h/from :tags)
+                    (h/where [:= :id id])))))
+
+(defn create-tag [new-tag]
+  (assert (nil? (:tags/id new-tag)))
+  (assoc new-tag :tags/slug (sluj (:tags/title new-tag))))
+
+(pco/defmutation create [new-tag]
+  (exec! (-> (h/insert-into :tags)
+             (h/values [(create-tag new-tag)])
+             (h/returning :id))))
+
+(pco/defmutation update [tag]
+  (assert (not (nil? (:tags/id tag))))
+  ;; QUESTION do I update slug too?
+  (exec! (-> (h/update :tags)
+             (h/set (-> tag
+                        (assoc :tags/edited_at (java.util.Date.))))
+             (h/where [:= :id (:tags/id tag)])
+             (h/returning :id))))
+
+(pco/defmutation delete [tag]
+  (assert (not (nil? (:tags/id tag))))
+  ;; QUESTION do I update slug too?
+  (exec! (-> (h/delete-from :tags)
+             (h/where [:= :id (:tags/id tag)])
+             (h/returning :id))))
+
+
+(comment
+  (create-tag {:tags/title "epic tag"})
+  (create {:tags/title "example tag"})
+  (tag {:tags/id 1})
+  (update {:tags/id 1 :tags/title "swage"})
+  (delete {:tags/id 1})
+  (tags))
 
 (pco/defresolver namespaces [env _]
   {::pco/output [:namespaces]}
@@ -48,6 +81,9 @@
                                     (h/from :votes)
                                     (h/where [:= :domain_pk_namespace ns])))}))
 
-(def resolvers [namespaces items-in-namespace votes-in-namespace])
+(def resolvers [namespaces
+                items-in-namespace
+                votes-in-namespace
+                create-tag])
 
 

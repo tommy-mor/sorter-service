@@ -73,12 +73,7 @@
                    :else {:first 10})
 
         params (merge params
-                      (if onlyParents?
-                        {:filter {:children {:length {:gt 0.0}}}}
-                        {}))
-        ]
-    (def page page)
-    
+                      (when onlyParents? {:filter {:children {:length {:gt 0.0}}}}))]
     (let [req (-> (linear-req {:queries
                                [[:issues params
                                  [[:nodes [:id
