@@ -37,7 +37,18 @@
                         (f/ui-table-row nil)
                         (f/ui-table-header nil))
                    (f/ui-table-body nil
-                                    (map ui-issue (::issues props))))
+                                    (map ui-issue (::issues props)))
+                   (->>
+                    (f/ui-menu {:pagination true
+                                :size "mini"
+                                :fluid true}
+                               (f/ui-menu-item {:as "a"} "1")
+                               (f/ui-menu-item {:as "a" :active true} "2")
+                               (f/ui-menu-item {:as "a"} "3")
+                               (f/ui-menu-item {:as "a"} "4"))
+                    (f/ui-table-header-cell {:colSpan 3})
+                    (f/ui-table-row nil)
+                    (f/ui-table-footer nil)))
        (f/ui-container nil)))
 
 
