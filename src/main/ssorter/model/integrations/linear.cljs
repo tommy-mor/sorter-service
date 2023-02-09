@@ -35,12 +35,14 @@
   (df/load! app ::issues Issue
             {:params params
              :target (targeting/replace-at
-                      [:component/id :IssueList ::issues])}))
+                      [:component/id :IssueList ::issues])
+             :marker ::spinner}))
 
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
    :initial-state {::issues []}
-   :query [{::issues (comp/get-query Issue)}]}
+   :query [{::issues (comp/get-query Issue)}
+           [df/marker-table ::spinner]]}
   (def props props)
 
   (let [left-arrow
@@ -50,11 +52,13 @@
         right-arrow
         (f/ui-menu-item {:as "a"
                          :onClick
-                         #(load this {:after (-> props ::issues last ::id)})} ">")]
+                         #(load this {:after (-> props ::issues last ::id)})} ">")
+
+        spinner (df/loading? (get props [df/marker-table ::spinner]))]
     (->> (f/ui-table {:celled true :striped true :compact true}
                      (->> (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
                                                        {:key "tom-315" :content "tom-315" :link true}]})
-                          (f/ui-table-header-cell {:colSpan 3})
+                          (f/ui-table-header-cell {:colSpan 3} (f/ui-loader {:active spinner}))
                           (f/ui-table-row nil)
                           (f/ui-table-header nil))
                      (f/ui-table-body nil
