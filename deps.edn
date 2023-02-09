@@ -39,7 +39,9 @@
         holyjak/fulcro-troubleshooting
         {;:git/tag "latest",
          :git/sha "c7a458f1ba3ae1f7c06e66d6d588be681c9c21c3",
-         :git/url "https://github.com/holyjak/fulcro-troubleshooting"}}
+         :git/url "https://github.com/holyjak/fulcro-troubleshooting"}
+
+        clojure-humanize/clojure-humanize {:mvn/version "0.2.2"}}
  
  :aliases {:test {:extra-deps {lambdaisland/kaocha {:mvn/version "1.73.1175"}}
                   :exec-fn kaocha.runner/exec-fn

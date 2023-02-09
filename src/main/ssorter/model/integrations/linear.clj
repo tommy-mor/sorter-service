@@ -56,7 +56,8 @@
                             ::title
                             ::description
                             ::createdAt
-                            ::estimate]}]}
+                            ::estimate
+                            ::priorityLabel]}]}
   (let [{:keys [before after] :as param} (pco/params env)
         page (cond before {:before before :last 10}
                    after {:after after :first 10}
@@ -69,10 +70,11 @@
                                            :title
                                            :description
                                            :createdAt
+                                           :priorityLabel
                                            :estimate]]]]]})
                   :data :issues :nodes wrap-keywords)]
       (def x req)
-      {::issues req})))
+      {::issues (if before (reverse req) req)})))
 
 
 (comment (-> (issues) ::issues first ::id))

@@ -14,15 +14,18 @@
     :refer
     [button div form h1 h2 h3 input label li ol p ul pre]]
    
-   [com.fulcrologic.semantic-ui.factories :as f]))
+   [com.fulcrologic.semantic-ui.factories :as f]
+   [clojure.contrib.humanize :refer [datetime]]))
 
 (defsc Issue [this props]
   {:ident ::id
-   :query [::id ::title ::createdAt]
+   :query [::id ::title ::createdAt ::priorityLabel]
    :initial-state {}}
-  (f/ui-table-row nil
-                  (f/ui-table-cell nil (::title props))
-                  (f/ui-table-cell nil (::createdAt props))))
+  (let [opts {:singleLine true}]
+    (f/ui-table-row nil
+                    (f/ui-table-cell opts (::title props))
+                    (f/ui-table-cell opts (datetime (::createdAt props)))
+                    (f/ui-table-cell opts (::priorityLabel props)))))
 
 
 (def ui-issue (comp/factory Issue {:keyfn ::id}))
@@ -40,13 +43,14 @@
    :query [{::issues (comp/get-query Issue)}]}
   (def props props)
 
-  (let [left-arrow (f/ui-menu-item {:as "a"
-                                    :onClick
-                                    #(load this {:after (-> props ::issues last ::id)})} "<")
+  (let [left-arrow
+        (f/ui-menu-item {:as "a"
+                         :onClick
+                         #(load this {:before (-> props ::issues first ::id)})} "<")
         right-arrow
         (f/ui-menu-item {:as "a"
                          :onClick
-                         #(load this {:before (-> props ::issues first ::id)})} ">")]
+                         #(load this {:after (-> props ::issues last ::id)})} ">")]
     (->> (f/ui-table {:celled true :striped true :compact true}
                      (->> (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
                                                        {:key "tom-315" :content "tom-315" :link true}]})
