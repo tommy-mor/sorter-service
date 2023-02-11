@@ -8,6 +8,7 @@ CREATE TABLE tags (
 
 	   domain_pk TEXT, -- PLHTRW7dzCGPzAC_kXkSyJ4Ru54Y9dMEjG
 	   domain_pk_namespace TEXT, -- youtube.playlist
+	   domain_url TEXT, -- for when this references something..
 
 	   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
 	   edited_at TIMESTAMP NOT NULL DEFAULT NOW(),
