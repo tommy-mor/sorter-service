@@ -47,8 +47,16 @@
            (make-datasource with-defaults))
   :stop (close-datasource db))
 
-(defn exec! [m] (with-open [conn (jdbc/get-connection {:datasource db})]
-                  (jdbc/execute! conn (sql/format m))))
+(defn exec! [m]
+  (def m m)
+  (with-open [conn (jdbc/get-connection {:datasource db})]
+    (jdbc/execute! conn (cond (map? m)
+                              (sql/format m)
+                              (string? m)
+                              [m]
+
+                              (vector? m)
+                              m))))
 
 
 

@@ -50,17 +50,26 @@
 (pco/defresolver right-item [env {:keys [:votes/right_item_id]}]
   {:votes/right_item {:items/id right_item_id}})
 
-(pco/defmutation create [env {:votes/keys [attribute left_item_id
-                                           right_item_id
-                                           domain_pk_namespace
-                                           magnitude] :as new-vote}]
+(pco/defmutation create [{:votes/keys [attribute left_item_id
+                                       right_item_id
+                                       domain_pk_namespace
+                                       magnitude] :as new-vote}]
   (assert (not= left_item_id right_item_id))
   
   (exec! (-> (h/insert-into :votes)
              (h/values [new-vote])
              (h/returning :id))))
 
-(def resolvers [votes vote vote-fields left-item right-item create])
+(pco/defmutation delete [vote]
+  (assert (:votes/id vote))
+  
+  (exec! (-> (h/delete-from :votes)
+             (h/where [:= :id (:votes/id vote)])
+             (h/returning :id))))
+
+(def resolvers [votes vote vote-fields left-item right-item
+
+                create delete])
 
 (comment (comment
            (vote-fields {} {:votes/id 1})))

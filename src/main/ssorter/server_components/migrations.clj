@@ -15,12 +15,6 @@
   (log/info "running migrations")
   (migratus/migrate (config db)))
 
-(comment (clojure.pprint/pprint (->> (exec! (-> (h/select :*)
-                                                (h/from :migrations)))
-                                     (map :migrations/id)
-                                     (drop 3)
-                                     reverse
-                                     (map #(migratus/down (config db) %)))))
 (defstate done
   :start (do
            (run db)))
@@ -35,4 +29,20 @@
   (migratus/rollback-until-just-after (config db) 20230209231627)
   
   (run))
+
+(defn clear-database []
+  (exec! (-> (h/delete-from :votes)
+             (h/where true)))
+  
+  (exec! (-> (h/delete-from :items_in_tags)
+             (h/where true)))
+  
+  (exec! (-> (h/delete-from :items)
+             (h/where true)))
+  
+  (exec! (-> (h/delete-from :tags)
+             (h/where true))))
+
+(comment
+  (clear-database))
 

@@ -59,7 +59,7 @@
   #_(log/info "fulcro request for" (:body-params request))
   (handle-api-request
    (:body-params request)
-   (fn [tx] (pathom/parser {:ring/request request} tx))))
+   (fn [tx] (pathom/parser {:ring/request request} {} tx))))
 
 (def router
   (rring/router [["/" {:get {:handler (constantly {:status 200 :body (slurp (io/resource "public/index.html"))})}}]

@@ -25,6 +25,7 @@
 (pco/defresolver tag [env {:keys [:tags/id]}]
   {::pco/input [:tags/id]
    ::pco/output [:tags/title :tags/description]}
+  (assert (number? id))
   (def x id)
   (first (exec! (-> (h/select :*)
                     (h/from :tags)
@@ -97,7 +98,10 @@
       (doall (map m.votes/delete orphaned-votes))
       
       (log/info "Deleting orphaned items" (count orphaned-items))
-      (doall (map m.items/delete orphaned-items)))))
+      (doall (map m.items/delete orphaned-items))))
+  
+  (exec! (-> (h/delete-from :tags)
+             (h/where [:= :id (:tags/id tag)]))))
 
 
 (comment

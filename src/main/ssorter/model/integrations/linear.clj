@@ -4,8 +4,16 @@
             
             [ssorter.server-components.db :refer [exec!]]
             [ssorter.server-components.config :refer [config]]
+            
+            [ssorter.model.tags :as m.tags]
+            [ssorter.model.membership :as m.membership]
+            [ssorter.model.items :as m.items]
+
+            [ssorter.sync :as sync]
+            
             [taoensso.timbre :as log]
             [honey.sql.helpers :as h]
+            [honey.sql :as sql]
             [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
             [com.wsscode.pathom3.connect.operation :as pco]
 
@@ -15,7 +23,12 @@
             [graphql-query.core :refer [graphql-query]]
 
             [jsonista.core :as j]
-            [clojure.walk :refer [prewalk]]))
+            [clojure.walk :refer [prewalk]]
+            [clojure.set]
+            [clojure.string :as str]
+            [tick.core :as t])
+  
+  (:import [org.postgresql.util PSQLException]))
 
 (def mapper
   (j/object-mapper
@@ -51,12 +64,95 @@
 
 (comment (wrap-keywords {:x/x 4}))
 
+(def important-fields [:id :title :identifier :description :url])
+
+(defn get-single-issue [{::keys [id]}]
+  (-> (linear-req {:queries [[:issue {:id id} important-fields]]})
+      :data :issue))
+
+(comment (get-single-issue params))
+
+(defn important-fieds->record [fields]
+  (def fields fields)
+  {:items/body (:description fields)
+   :items/url (:url fields)
+   :items/title (str "linear/"(:identifier fields) " - " (:title fields))
+   :items/domain_pk (:id fields)
+   :items/domain_pk_namespace "linear.issue"
+   :items/access 0})
+
+(defn sync-linear-parent-with-tag [{tagid :tags/id linearid ::id}]
+  (def tagid tagid)
+  (def linearid linearid)
+
+  (def linear-ids (->> (linear-req {:queries [[:issue {:id linearid}
+                                               [[:children [[:nodes [:id :updatedAt]]]]]]]})
+                       :data :issue :children :nodes
+                       (map (juxt :id (comp t/inst :updatedAt)))
+                       (into {})))
+
+  (when (empty? linear-ids)
+    (throw (ex-info "no subissues" {::id linearid :tags/id tagid})))
+
+  (def existing-members ((fn [] (->> (m.membership/tag-members {:tags/id tagid})
+                                     :tags/members
+                                     (map m.items/item)))))
+
+  (def existinglinearid->edited (into {} (map (juxt :items/domain_pk :items/edited_at) existing-members)))
+
+  (let [{new-from-linear :left-only
+         obsolete-items :right-only
+         needs-updating :middle-left-newer}
+        (sync/split-by-inst linear-ids existinglinearid->edited)
+
+        to-fetch (clojure.set/union new-from-linear needs-updating)]
+    
+    (def issue-data (->> (linear-req {:queries [[:issues {:filter {:id {:in to-fetch}}}
+                                                 [[:nodes
+                                                   important-fields]]]]})
+                         :data :issues :nodes
+                         (map important-fieds->record)))
+
+    (def new-from-linear new-from-linear)
+    (def needs-updating needs-updating)
+    (def obsolete-items obsolete-items)
+
+    (def itemids (m.items/create-many
+                  (->> issue-data
+                       (filter (comp new-from-linear :items/domain_pk)))))
+    
+    (doall (->> issue-data
+                (filter (comp needs-updating :items/domain_pk))
+                (map m.items/update)))
+
+    (doall (->> obsolete-items
+                (map #(hash-map :items/domain_pk %))
+                (map m.items/delete)))
+
+    (when (not-empty itemids)
+      (m.membership/enroll-many-items (map #(assoc % :tags/id tagid) itemids) ))
+    
+    itemids))
+
 (pco/defmutation start-sorting-issue [params]
-  (def y params)
-  "make a tag"
-  "add current subissues to the tag"
-  (log/info "start sorting an issue" params)
-  {:done true})
+  (def params params)
+  (def issue (get-single-issue params))
+  (def tagid (-> (m.tags/create {:tags/title (str "linear.issue/" (:identifier issue) " - " (:title issue))
+                                 :tags/description (:description issue)
+                                 :tags/domain_pk (::id params)
+                                 :tags/domain_pk_namespace "linear.issue"
+                                 :tags/domain_url (:url issue)})
+                 first
+                 :tags/id))
+  (comment (exec! (-> (h/delete-from :tags)
+                      (h/where true))))
+
+  (sync-linear-parent-with-tag {:tags/id tagid ::id (::id params)})
+
+  "TODO make linear things show up in ui (query for domain_pk in tags...)"
+ 
+
+  {:tags/id tagid})
 
 (pco/defresolver issues [env _]
   {::pco/output [{::issues [::id

@@ -35,6 +35,9 @@
         district0x/graphql-query {:mvn/version "1.0.6"}
 
         hikari-cp/hikari-cp {:mvn/version "3.0.1"}
+        
+        tick/tick {:mvn/version "0.5.0"}
+
 
 
         

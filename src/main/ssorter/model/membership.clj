@@ -41,5 +41,10 @@
   (exec! (-> (h/insert-into :items_in_tags)
              (h/values (map translate-keywords items)))))
 
+(pco/defmutation unenroll-item [itemidtagid]
+  (exec! (-> (h/delete-from :items_in_tags)
+             (h/where
+              [:= :item_id (:items/id itemidtagid)]
+              [:= :tag_id (:tags/id itemidtagid)]))))
 
-(def resolvers [tag-members item-memberships enroll-item])
+(def resolvers [tag-members item-memberships enroll-item unenroll-item])

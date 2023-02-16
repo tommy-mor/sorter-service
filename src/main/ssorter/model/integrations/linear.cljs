@@ -25,11 +25,12 @@
   {:ident ::id
    :query [::id ::title ::createdAt ::priorityLabel ::children ::identifier]
    :initial-state {}}
-  (let [opts {:singleLine true}]
+  (let [opts {:singleLine true}
+        onclick
+        #(if (js/confirm "sort this issue?")
+           (transact! this [(start-sorting-issue {::id (::id props)})]))]
     (f/ui-table-row nil
-                    (f/ui-table-cell opts (dom/a {:onClick #(if (js/confirm "sort this issue?")
-                                                              (transact! this [(start-sorting-issue {:id 3})]))
-                                                  :href "#"} (::identifier props)))
+                    (f/ui-table-cell opts (dom/a {:onClick onclick :href "#"} (::identifier props)))
                     (f/ui-table-cell opts (::title props))
                     (f/ui-table-cell opts (pr-str (-> props ::children ::nodes count)))
                     (f/ui-table-cell opts (datetime (::createdAt props)))
