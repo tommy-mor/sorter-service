@@ -42,6 +42,7 @@
 
 (pco/defmutation update [tag]
   (assert (not (nil? (:tags/id tag))))
+  ;; TODO use util method to update with just domainpk
   ;; QUESTION do I update slug too?
   (exec! (-> (h/update :tags)
              (h/set (-> tag

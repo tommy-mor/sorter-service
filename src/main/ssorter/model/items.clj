@@ -69,21 +69,20 @@
                       (h/where [:= :id (:items/id item)])
                       (h/returning :id))))))
 
-(pco/defmutation delete [{:items/keys [id domain_pk]}]
-  (assert (or id domain_pk))
-  (assert (not (and id domain_pk)))
-
-  (def domain_pk domain_pk)
-  ;; TODO delete votes referencing this item?
-  (let [id (or id (-> (exec! {:select :id :from :items :where [:= :domain_pk domain_pk]})
-                      first :items/id))]
-    (exec! (-> (h/delete-from :items_in_tags)
-               (h/where [:= :item_id id])
-               (h/returning :tag_id)))
+(pco/defmutation delete [item]
+  (let [item (utils/fill-out-id :items item)
+        id (:items/id item)]
     
-    (exec! (-> (h/delete-from :items)
-               (h/where [:= :id id])
-               (h/returning :id)))))
+       (assert (:items/id item))
+       
+       ;; TODO delete votes referencing this item?
+       (exec! (-> (h/delete-from :items_in_tags)
+                  (h/where [:= :item_id id])
+                  (h/returning :tag_id)))
+       
+       (exec! (-> (h/delete-from :items)
+                  (h/where [:= :id id])
+                  (h/returning :id)))))
 
 (def resolvers [items item item-by-id create create-many delete])
 
