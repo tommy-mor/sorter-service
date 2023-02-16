@@ -20,6 +20,7 @@ CREATE TABLE tags (
 CREATE TABLE items_in_tags (
 	   item_id integer REFERENCES items(id) NOT NULL,
 	   tag_id integer REFERENCES tags(id) NOT NULL,
+	   status integer NOT NULL DEFAULT 0,
 
 	   PRIMARY KEY (item_id, tag_id)
 )

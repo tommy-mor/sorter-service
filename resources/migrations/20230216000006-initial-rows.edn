@@ -1,0 +1,4 @@
+{:ns ssorter.server-components.migrations.fruits
+ :up-fn up
+ :down-fn down
+ :transaction? true}

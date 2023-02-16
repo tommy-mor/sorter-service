@@ -21,6 +21,7 @@
   to recompile, and then use `start` once things are good."
   []
   (stop)
+  (tools-ns/clear)
   (tools-ns/refresh :after 'development/start))
 
 (comment

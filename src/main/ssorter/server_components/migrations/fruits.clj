@@ -1,4 +1,4 @@
-(ns ssorter.initial-data
+(ns ssorter.server-components.migrations.fruits
   (:require
    [ssorter.server-components.db :refer [db exec!]]
    [next.jdbc :as jdbc]
@@ -7,10 +7,7 @@
    [honey.sql.helpers :as h]
    [crypto.password.bcrypt :as password]
    [ssorter.model.groups]
-   [ssorter.old-importer :as old]))
-
-(comment (jdbc/execute! db (sql/format (-> (h/select :*)
-                                           (h/from :users)))))
+   [ssorter.server-components.migrations.old-importer :as old]))
 
 (defn gather-from-json [id]
   
@@ -58,4 +55,19 @@
 
   (gather-from-json old/fruits-id))
 
-(comment (fill-database))
+(defn up [x]
+  (def x {:store :database, :migration-dir "migrations/",
+          :migration-table-name "migrations",
+          :db {:datasource nil},
+          :conn nil})
+  (fill-database))
+
+(defn down [y]
+  (exec! (-> (h/delete-from :attributes)
+             (h/where [:= :id 0])))
+  
+  (exec! (-> (h/delete-from :access)
+             (h/where [:= :id 0])))
+  
+  (exec! (-> (h/delete-from :users)
+             (h/where [:= :user_name "tommy"]))))

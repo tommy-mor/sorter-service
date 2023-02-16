@@ -12,6 +12,7 @@
             [ssorter.model.votes :as m.votes]
             [ssorter.model.items :as m.items]
             [ssorter.model.tags :as m.tags]
+            [ssorter.model.membership :as m.membership]
             [ssorter.model.sorted :as m.sorted]
             [ssorter.model.integrations.linear :as m.i.linear]
             [ssorter.pair :as pair]
@@ -32,7 +33,8 @@
                     m.tags/resolvers
                     m.sorted/resolvers
                     pair/resolvers
-                    m.i.linear/resolvers])
+                    m.i.linear/resolvers
+                    m.membership/resolvers])
 
 
 (defn clean-exceptions "takes a pathom3 response, and looks for throwables. converts them to maps"
