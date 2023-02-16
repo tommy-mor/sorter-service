@@ -9,6 +9,10 @@
    ;; for test comment block
    [com.wsscode.pathom3.connect.indexes :as pci]
    [com.wsscode.pathom3.interface.eql :as p.eql]
+   
+   [ssorter.model.membership :as m.membership]
+   [ssorter.model.items :as m.items]
+   [ssorter.model.votes :as m.votes]
    [sluj.core :refer [sluj]]))
 
 
@@ -18,9 +22,10 @@
     {:tags (exec! (-> (h/select :id)
                       (h/from :tags)))}))
 
-(pco/defresolver tag [env {:keys [tags/id]}]
-  {::pco/input [:tags/id]}
-  {::pco/output [:tags/title :tags/description]}
+(pco/defresolver tag [env {:keys [:tags/id]}]
+  {::pco/input [:tags/id]
+   ::pco/output [:tags/title :tags/description]}
+  (def x id)
   (first (exec! (-> (h/select :*)
                     (h/from :tags)
                     (h/where [:= :id id])))))
@@ -43,12 +48,56 @@
              (h/where [:= :id (:tags/id tag)])
              (h/returning :id))))
 
+(defn tag-garbage [tag]
+  (def orphaned-items (exec! (-> (h/from [:items :i1])
+                                 (h/select :i1.id)
+                                 (h/where [:in :i1/id (-> (h/select-distinct :item_id)
+                                                          (h/from :items_in_tags)
+                                                          (h/where [:= :tag_id (:tags/id tag)]))])
+                                 (h/left-join :items_in_tags
+                                              [:= :items_in_tags/item_id :i1/id])
+                                 (h/group-by :i1/id)
+                                 (h/having [:= 1 :%count.items_in_tags/tag_id]))))
+  
+  (def orphaned-votes
+    (if (empty? orphaned-items)
+      []
+      (exec! (-> (h/from :votes)
+                 (h/select :id)
+                 (h/where :or
+                          [:in :votes/left_item_id (map :items/id orphaned-items)]
+                          [:in :votes/right_item_id (map :items/id orphaned-items)])))))
+  
+  (def orphaned-memberships
+    (if (empty? orphaned-items)
+      []
+      (->> (exec! (-> (h/from :items_in_tags)
+                      (h/select :tag_id :item_id)
+                      (h/where [:= :items_in_tags/tag_id (:tags/id tag)]
+                               [:in :items_in_tags/item_id
+                                (map :items/id orphaned-items)])))
+           (map #(clojure.set/rename-keys % {:items_in_tags/item_id :items/id
+                                             :items_in_tags/tag_id :tags/id})))))
+  {:orphaned-items orphaned-items
+   :orphaned-votes orphaned-votes
+   :orphaned-memberships orphaned-memberships})
+  
+  
+  
 (pco/defmutation delete [tag]
   (assert (not (nil? (:tags/id tag))))
-  ;; QUESTION do I update slug too?
-  (exec! (-> (h/delete-from :tags)
-             (h/where [:= :id (:tags/id tag)])
-             (h/returning :id))))
+  
+  (log/info "Deleting tag" tag)
+  (when (::cascade? tag)
+    (let [{:keys [orphaned-items orphaned-votes orphaned-memberships]} (tag-garbage tag)]
+      
+      (doall (map m.membership/unenroll-item orphaned-memberships))
+      
+      (log/info "Deleting orphaned votes" (count orphaned-votes))
+      (doall (map m.votes/delete orphaned-votes))
+      
+      (log/info "Deleting orphaned items" (count orphaned-items))
+      (doall (map m.items/delete orphaned-items)))))
 
 
 (comment
@@ -84,6 +133,7 @@
 (def resolvers [namespaces
                 items-in-namespace
                 votes-in-namespace
-                create-tag])
+                
+                tags tag create update delete])
 
 
