@@ -11,30 +11,43 @@
    
    [com.fulcrologic.semantic-ui.factories :as f]))
 
+(defsc Sorted [this props]
+  {:ident :sorted/id
+   :query [:sorted/id
+           :sorted/unsorted
+           :sorted/sorted]
+   :initLocalState (fn [_ _] {::segment 0})}
+  
+  (let [segment (comp/get-state this ::segment)
+        onclick (fn [idx] #(comp/set-state! this {::segment idx}))]
+    (f/ui-accordion {:styled true
+                     :fluid true}
+                    (f/ui-accordion-title {:active (= 0 segment)
+                                           :onClick (onclick 0)}
+                                          "sorted")
+                    (f/ui-accordion-content {:active (= 0 segment)}
+                                            (for [item (:sorted/sorted props)]
+                                              (div (pr-str item))))
+                    
+                    (f/ui-accordion-title {:active (= 1 segment)
+                                           :onClick (onclick 1) }
+                                          "unsorted")
+                    (f/ui-accordion-content {:active (= 1 segment)}
+                                            (for [item (:sorted/unsorted props)]
+                                              (div (pr-str item)))))))
+
+(def ui-sorted (comp/factory Sorted))
+
 (defsc Tag [this props]
   {:ident :tags/id
-   :query [:tags/id :tags/title :tags/slug ::active-segment]
-   :initLocalState (fn [_ _] {::segment 0})}
+   :query [:tags/id :tags/title :tags/slug {:tags/sorted (comp/get-query Sorted)}]}
   (f/ui-container {}
                   (f/ui-segment {}
                                 (f/ui-header {:as "h2"}
                                              (:tags/title props))
-                                (:tags/description props))
-                  (let [segment (comp/get-state this ::segment)
-                        onclick (fn [idx] #(comp/set-state! this {::segment idx}))]
-                    (f/ui-accordion {:styled true
-                                     :fluid true}
-                                    (f/ui-accordion-title {:active (= 0 segment)
-                                                           :onClick (onclick 0)}
-                                                          "epic1")
-                                    (f/ui-accordion-content {:active (= 0 segment)}
-                                                            "epic1 content")
-                                    
-                                    (f/ui-accordion-title {:active (= 1 segment)
-                                                           :onClick (onclick 1) }
-                                                          "epic2")
-                                    (f/ui-accordion-content {:active (= 1 segment)}
-                                                            "epic2 content")))
+                                (:tags/description props)
+                                (:tags/slug props))
+                  (ui-sorted (:tags/sorted props))
                   (pr-str props)))
 
 (def ui-tag (comp/factory Tag))

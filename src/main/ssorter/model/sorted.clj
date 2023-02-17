@@ -1,12 +1,14 @@
 (ns ssorter.model.sorted
   (:require
    [ssorter.server-components.db :refer [exec!]]
+   [ssorter.model.tags :as m.tags]
+   [ssorter.model.membership :as m.membership]
+   
    [taoensso.timbre :as log]
    [honey.sql.helpers :as h]
    [honey.sql :as hq]
    [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
    [com.wsscode.pathom3.connect.operation :as pco]
-   
    [ssorter.rank :as rank]
 
    ;; for test comment block
@@ -25,14 +27,14 @@
   {:sorted/sorted
    (vec (for [[item score] (rank/sorted (map #(hash-map :items/id %) valid-ids) votes)]
           (assoc item :items/score score)))
-   :sorted/unsorted-ids (clojure.set/difference (set ids) valid-ids)})
+   :sorted/unsorted  (map #(hash-map :items/id %) (clojure.set/difference (set ids) valid-ids))})
 
 (pco/defresolver by-pks
   "params. :ids for list of ids. if you include the ns tag,
    it gathers its rank from entire tag, not just your subset."
   [env _]
   {::pco/output [{:sorted/by-pks [{:sorted/sorted [:items/id :items/score]}
-                                  :sorted/unsorted-ids]}]}
+                                  {:sorted/unsorted [:items/id]}]}]}
   (let [params (pco/params env)]
     (def params params)
     (def pks (:items/domain_pks params))
@@ -49,8 +51,19 @@
    it gathers its rank from entire tag, not just your subset."
   [env _]
   {::pco/output [{:sorted/by-ids [{:sorted/sorted [:items/id :items/score]}
-                                  :sorted/unsorted-ids]}]}
+                                  {:sorted/unsorted [:items/id]}]}]}
   {:sorted/by-ids (sorted-by-ids (:ids (pco/params env)))})
 
+(pco/defresolver by-tag [env {:keys [tags/id]}]
+  {::pco/input [:tags/id]
+   ::pco/output [:tags/sorted {:sorted/sorted [:items/id :items/score]
+                               :sorted/unsorted [:items/id]}]}
 
-(def resolvers [by-ids by-pks])
+  {:tags/sorted (-> (sorted-by-ids (->> (m.membership/tag-members {:tags/id id})
+                                     :tags/members
+                                     (filter (comp #{0} ::m.membership/status))
+                                     (map :items/id)))
+                    (assoc :sorted/id {:tags/id id ::m.membership/status 0}))})
+
+
+(def resolvers [by-ids by-pks by-tag])
