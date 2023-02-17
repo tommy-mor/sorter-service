@@ -1,5 +1,7 @@
 (ns ssorter.model.tags
   (:require 
+   [ssorter.model.items :as m.items]
+   
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
    [com.fulcrologic.fulcro.mutations :as m]
    [com.fulcrologic.fulcro.components :as comp :refer [defsc transact!]]
@@ -14,8 +16,8 @@
 (defsc Sorted [this props]
   {:ident :sorted/id
    :query [:sorted/id
-           :sorted/unsorted
-           :sorted/sorted]
+           {:sorted/unsorted (comp/get-query m.items/Item)}
+           {:sorted/sorted (comp/get-query m.items/Item)}]
    :initLocalState (fn [_ _] {::segment 0})}
   
   (let [segment (comp/get-state this ::segment)
@@ -26,15 +28,13 @@
                                            :onClick (onclick 0)}
                                           "sorted")
                     (f/ui-accordion-content {:active (= 0 segment)}
-                                            (for [item (:sorted/sorted props)]
-                                              (div (pr-str item))))
+                                            (m.items/ui-item-list (:sorted/sorted props)))
                     
                     (f/ui-accordion-title {:active (= 1 segment)
                                            :onClick (onclick 1) }
                                           "unsorted")
                     (f/ui-accordion-content {:active (= 1 segment)}
-                                            (for [item (:sorted/unsorted props)]
-                                              (div (pr-str item)))))))
+                                            (m.items/ui-item-list (:sorted/unsorted props))))))
 
 (def ui-sorted (comp/factory Sorted))
 
