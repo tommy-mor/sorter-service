@@ -14,13 +14,19 @@
 (defsc Item [this props]
   {:ident :items/id
    :query [:items/id :items/title]}
-  (h1 (:items/title props)))
+  (let [opts {:singleLine true}]
+    (f/ui-table-row {}
+                    (f/ui-table-cell opts (:items/id props))
+                    (f/ui-table-cell opts (:items/title props)))))
 
 (def ui-item (comp/factory Item))
 
-(defsc ItemList [this props]
-  (div "list"
-       (map ui-item props)
-       (dom/pre (pr-str props))))
+(defsc ItemList [this {:keys [list title]}]
+  (if (empty? list)
+    (f/ui-table-body {} (f/ui-table-row {} (f/ui-segment {:placeholder true
+                                                          :attached true} (str "this tag has no " title " items"))))
+    (->> (f/ui-table {:fluid true :attached true}
+                     (f/ui-table-body {}
+                                      (map ui-item list))))))
 
 (def ui-item-list (comp/factory ItemList))

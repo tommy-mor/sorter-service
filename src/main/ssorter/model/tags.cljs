@@ -27,14 +27,18 @@
                     (f/ui-accordion-title {:active (= 0 segment)
                                            :onClick (onclick 0)}
                                           "sorted")
-                    (f/ui-accordion-content {:active (= 0 segment)}
-                                            (m.items/ui-item-list (:sorted/sorted props)))
+                    (f/ui-accordion-content {:active (= 0 segment)
+                                             :style {:padding 0}}
+                                            (m.items/ui-item-list {:list (:sorted/sorted props)
+                                                                   :title "sorted"}))
                     
                     (f/ui-accordion-title {:active (= 1 segment)
                                            :onClick (onclick 1) }
                                           "unsorted")
-                    (f/ui-accordion-content {:active (= 1 segment)}
-                                            (m.items/ui-item-list (:sorted/unsorted props))))))
+                    (f/ui-accordion-content {:active (= 1 segment)
+                                             :style {:padding 0}}
+                                            (m.items/ui-item-list {:list (:sorted/unsorted props)
+                                                                   :title "unsorted"})))))
 
 (def ui-sorted (comp/factory Sorted))
 
