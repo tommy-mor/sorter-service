@@ -4,6 +4,7 @@
    [ssorter.client.app :refer [app]]
    
    [ssorter.model.integrations.linear :as linear]
+   [ssorter.model.tags :as m.tags]
    [com.fulcrologic.fulcro.application :as app]
    [com.fulcrologic.fulcro.components :as comp]
    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
@@ -22,6 +23,8 @@
               (app/root-class app)
               "app"
               {:initialize-state? false})
+  
+  (m.tags/load app)
   (linear/load app))
 
 (defn ^:export refresh
@@ -30,6 +33,7 @@
   (println "refreshing app...")
   (comp/refresh-dynamic-queries! app)
   (app/mount! app (app/root-class app) "app")
+  (m.tags/load app)
   (linear/load app))
 
 

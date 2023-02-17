@@ -184,7 +184,6 @@
       (def x req)
       {::issues (if before (reverse req) req)})))
 
-
 (comment (-> (issues) ::issues first ::id))
 
 (def resolvers [issues start-sorting-issue])

@@ -22,6 +22,8 @@
     {:tags (exec! (-> (h/select :id)
                       (h/from :tags)))}))
 
+(comment (tags))
+
 (pco/defresolver tag [env {:keys [:tags/id]}]
   {::pco/input [:tags/id]
    ::pco/output [:tags/title :tags/description]}
