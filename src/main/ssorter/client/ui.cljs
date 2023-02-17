@@ -16,11 +16,13 @@
    [com.fulcrologic.semantic-ui.factories :as f]
    [clojure.contrib.humanize :refer [truncate]]))
 
-(defn panes-from-tags [tags]
+(defn panes-from-tags [this tags]
   (vec (for [tag tags]
          {:menuItem
           (-> tag :tags/title (truncate 50))
-          :render (fn [] (h1 "EPIC!!"))})))
+          :render (fn []
+                    (comp/with-parent-context this
+                      (m.tags/ui-tag tag)))})))
 
 (defsc Root [this props]
   {:query [{:root/issues (comp/get-query linear/IssueList)}
@@ -35,6 +37,6 @@
                                     :render
                                     (fn [] (comp/with-parent-context this
                                              (linear/ui-issue-list (:root/issues props))))}]
-                                  (panes-from-tags (-> props :root/tags :tags)))})
+                                  (panes-from-tags this (-> props :root/tags :tags)))})
         (f/ui-container nil)
         (f/ui-segment {:style {:padding "8em 0em"} :vertical true}))))

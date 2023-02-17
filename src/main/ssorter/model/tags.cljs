@@ -14,7 +14,16 @@
 (defsc Tag [this props]
   {:ident :tags/id
    :query [:tags/id :tags/title :tags/slug]
-   :initial-state {}})
+   :initial-state {}}
+  (f/ui-container {}
+                  (f/ui-segment {}
+                                (f/ui-header {:as "h2"}
+                                             (:tags/title props))
+                                (:tags/description props))
+
+                  (div "accordion?")))
+
+(def ui-tag (comp/factory Tag))
 
 (defsc TagList [this props]
   {:ident (fn [] [:component/id :TagList])
