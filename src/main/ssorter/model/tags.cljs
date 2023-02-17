@@ -13,15 +13,29 @@
 
 (defsc Tag [this props]
   {:ident :tags/id
-   :query [:tags/id :tags/title :tags/slug]
-   :initial-state {}}
+   :query [:tags/id :tags/title :tags/slug ::active-segment]
+   :initLocalState (fn [_ _] {::segment 0})}
   (f/ui-container {}
                   (f/ui-segment {}
                                 (f/ui-header {:as "h2"}
                                              (:tags/title props))
                                 (:tags/description props))
-
-                  (div "accordion?")))
+                  (let [segment (comp/get-state this ::segment)
+                        onclick (fn [idx] #(comp/set-state! this {::segment idx}))]
+                    (f/ui-accordion {:styled true
+                                     :fluid true}
+                                    (f/ui-accordion-title {:active (= 0 segment)
+                                                           :onClick (onclick 0)}
+                                                          "epic1")
+                                    (f/ui-accordion-content {:active (= 0 segment)}
+                                                            "epic1 content")
+                                    
+                                    (f/ui-accordion-title {:active (= 1 segment)
+                                                           :onClick (onclick 1) }
+                                                          "epic2")
+                                    (f/ui-accordion-content {:active (= 1 segment)}
+                                                            "epic2 content")))
+                  (pr-str props)))
 
 (def ui-tag (comp/factory Tag))
 
