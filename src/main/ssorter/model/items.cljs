@@ -11,6 +11,13 @@
    
    [com.fulcrologic.semantic-ui.factories :as f]))
 
+(defsc BigItem [this props]
+  {:ident :items/id
+   :query [:items/id :items/title]}
+  (f/ui-segment {} (h3 (:items/title props))))
+
+(def ui-big-item (comp/factory BigItem {:keyfn :items/id}))
+
 (defsc Item [this props]
   {:ident :items/id
    :query [:items/id :items/title]}

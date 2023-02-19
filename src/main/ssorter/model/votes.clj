@@ -50,15 +50,22 @@
 (pco/defresolver right-item [env {:keys [:votes/right_item_id]}]
   {:votes/right_item {:items/id right_item_id}})
 
-(pco/defmutation create [{:votes/keys [attribute left_item_id
+(pco/defmutation create [{:votes/keys [left_item_id
                                        right_item_id
-                                       domain_pk_namespace
-                                       magnitude] :as new-vote}]
+                                       magnitude
+                                       attribute]
+                          :tags/keys [id]
+                          :as new-vote}]
   (assert (not= left_item_id right_item_id))
+  (def new-vote new-vote)
+
+  "TODO dedupe votes based on ownership, who created them. one user cannot duplicate votes.."
   
-  (exec! (-> (h/insert-into :votes)
-             (h/values [new-vote])
-             (h/returning :id))))
+  (def r (-> (exec! (-> (h/insert-into :votes)
+                        (h/values [(dissoc new-vote :tags/id)])
+                        (h/returning :id)))
+             first))
+  (assoc r :tags/id id))
 
 (pco/defmutation delete [vote]
   (assert (:votes/id vote))
