@@ -21,8 +21,6 @@
 "TODO check mark that controlls if you get a new pair. this way you can try out many combos and see effect"
 
 
-"{{{{{{{{{finish vote transaction.. ponder if i should merge pair and vote namespaces.. they are same concept? or different. i feel like different.}}}}}}}}}"
-
 (defsc Pair [this props]
   {:ident :sorted/id
    :query [:sorted/id

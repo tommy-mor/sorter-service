@@ -27,7 +27,8 @@
   {:sorted/sorted
    (vec (for [[item score] (rank/sorted (map #(hash-map :items/id %) valid-ids) votes)]
           (assoc item :items/score score)))
-   :sorted/unsorted  (map #(hash-map :items/id %) (clojure.set/difference (set ids) valid-ids))})
+   :sorted/unsorted  (map #(hash-map :items/id %) (clojure.set/difference (set ids) valid-ids))
+   :sorted/votes votes})
 
 (pco/defresolver by-pks
   "params. :ids for list of ids. if you include the ns tag,
@@ -56,14 +57,16 @@
 
 (pco/defresolver by-tag [env {:keys [tags/id]}]
   {::pco/input [:tags/id]
-   ::pco/output [:tags/sorted {:sorted/sorted [:items/id :items/score]
-                               :sorted/unsorted [:items/id]}]}
+   ::pco/output [{:tags/sorted [{:sorted/sorted [:items/id :items/score]}
+                                {:sorted/unsorted [:items/id]}]}
+                 {:tags/members [:items/id]}]}
 
-  {:tags/sorted (-> (sorted-by-ids (->> (m.membership/tag-members {:tags/id id})
-                                     :tags/members
-                                     (filter (comp #{0} ::m.membership/status))
-                                     (map :items/id)))
-                    (assoc :sorted/id {:tags/id id ::m.membership/status 0}))})
+  (let [members (:tags/members (m.membership/tag-members {:tags/id id}))]
+    {:tags/sorted (-> (sorted-by-ids (->> members
+                                          (filter (comp #{0} ::m.membership/status))
+                                          (map :items/id)))
+                      (assoc :sorted/id {:tags/id id ::m.membership/status 0}))
+     :tags/members members}))
 
 
 (def resolvers [by-ids by-pks by-tag])

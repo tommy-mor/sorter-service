@@ -50,6 +50,10 @@
 (pco/defresolver right-item [env {:keys [:votes/right_item_id]}]
   {:votes/right_item {:items/id right_item_id}})
 
+(pco/defresolver tag-votes [env {:keys [:tags/sorted]}]
+  
+  {:tags/votes (:sorted/votes sorted)})
+
 (pco/defmutation create [{:votes/keys [left_item_id
                                        right_item_id
                                        magnitude
@@ -76,7 +80,9 @@
 
 (def resolvers [votes vote vote-fields left-item right-item
 
-                create delete])
+                create delete
+
+                tag-votes])
 
 (comment (comment
            (vote-fields {} {:votes/id 1})))

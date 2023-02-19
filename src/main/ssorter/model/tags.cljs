@@ -2,6 +2,7 @@
   (:require 
    [ssorter.model.items :as m.items]
    [ssorter.model.pairs :as m.pairs]
+   [ssorter.model.votes :as m.votes]
    
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
    [com.fulcrologic.fulcro.mutations :as m]
@@ -52,7 +53,8 @@
            :tags/title
            :tags/slug
            {:tags/sorted (comp/get-query Sorted)}
-           {:tags/pair (comp/get-query m.pairs/Pair)}]}
+           {:tags/pair (comp/get-query m.pairs/Pair)}
+           {:tags/votes (comp/get-query m.votes/Vote)}]}
   (f/ui-container {}
                   (f/ui-segment {}
                                 (f/ui-header {:as "h2"}
@@ -60,7 +62,8 @@
                                 (:tags/description props)
                                 (:tags/slug props))
                   (ui-sorted (:tags/sorted props))
-                  (m.pairs/ui-pair (:tags/pair props))))
+                  (m.pairs/ui-pair (:tags/pair props))
+                  (m.votes/ui-vote-list {:list (:tags/votes props)})))
 
 (def ui-tag (comp/factory Tag))
 
