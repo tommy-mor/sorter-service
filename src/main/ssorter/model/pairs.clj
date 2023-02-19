@@ -1,4 +1,4 @@
-(ns ssorter.pair
+(ns ssorter.model.pairs
   (:require
    [ssorter.server-components.db :refer [exec!]]
    [taoensso.timbre :as log]
@@ -40,6 +40,24 @@
   {:pair/left {:items/id left_item_id}
    :pair/right {:items/id right_item_id}})
 
+(pco/defresolver sorted-pair [env {:keys [:sorted/id :sorted/unsorted :sorted/sorted]}]
+  {::pco/output [{:sorted/pair [:pair/letf_item_id :pair/right_item_id]}]}
+  
+  (def x unsorted)
+  (def y sorted)
+  {:sorted/pair {:pair/left_item_id 0 :pair/right_item_id 1}})
+
+(pco/defresolver tag-pair [env {:keys [:tags/sorted]}]
+  {::pco/output [{:tags/pair [:pair/letf_item_id :pair/right_item_id]}]}
+  (def sorted sorted)
+
+  {:tags/pair (merge {:sorted/id (:sorted/id sorted)}
+                     (pair-from-itemids (concat (:sorted/unsorted sorted)
+                                                (:sorted/sorted sorted))))})
+
+
 (def resolvers [pair-for-namespace
                 pair-for-itemids
-                pair-items])
+                pair-items
+                sorted-pair
+                tag-pair])

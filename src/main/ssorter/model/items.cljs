@@ -19,7 +19,7 @@
                     (f/ui-table-cell opts (:items/id props))
                     (f/ui-table-cell opts (:items/title props)))))
 
-(def ui-item (comp/factory Item))
+(def ui-item (comp/factory Item {:keyfn :items/id}))
 
 (defsc ItemList [this {:keys [list title]}]
   (if (empty? list)
@@ -27,9 +27,9 @@
          (f/ui-table-cell {:singleLine true})
          (f/ui-table-row {:disabled true})
          (f/ui-table-body {})
-         (f/ui-table {:fluid true :attached true}))
+         (f/ui-table {:attached true}))
     
-    (->> (f/ui-table {:fluid true :attached true}
+    (->> (f/ui-table {:attached true}
                      (f/ui-table-body {}
                                       (map ui-item list))))))
 

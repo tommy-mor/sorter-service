@@ -1,6 +1,7 @@
 (ns ssorter.model.tags
   (:require 
    [ssorter.model.items :as m.items]
+   [ssorter.model.pairs :as m.pairs]
    
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
    [com.fulcrologic.fulcro.mutations :as m]
@@ -12,6 +13,7 @@
     [button div form h1 h2 h3 input label li ol p ul pre]]
    
    [com.fulcrologic.semantic-ui.factories :as f]))
+
 
 (defsc Sorted [this props]
   {:ident :sorted/id
@@ -34,7 +36,9 @@
                     
                     (f/ui-accordion-title {:active (= 1 segment)
                                            :onClick (onclick 1) }
-                                          "unsorted")
+                                          (str "unsorted ("
+                                               (count (:sorted/unsorted props))
+                                               ")"))
                     (f/ui-accordion-content {:active (= 1 segment)
                                              :style {:padding 0}}
                                             (m.items/ui-item-list {:list (:sorted/unsorted props)
@@ -44,7 +48,11 @@
 
 (defsc Tag [this props]
   {:ident :tags/id
-   :query [:tags/id :tags/title :tags/slug {:tags/sorted (comp/get-query Sorted)}]}
+   :query [:tags/id
+           :tags/title
+           :tags/slug
+           {:tags/sorted (comp/get-query Sorted)}
+           :tags/pair]}
   (f/ui-container {}
                   (f/ui-segment {}
                                 (f/ui-header {:as "h2"}
@@ -52,7 +60,7 @@
                                 (:tags/description props)
                                 (:tags/slug props))
                   (ui-sorted (:tags/sorted props))
-                  (pr-str props)))
+                  (m.pairs/ui-pair (:tags/pair props))))
 
 (def ui-tag (comp/factory Tag))
 

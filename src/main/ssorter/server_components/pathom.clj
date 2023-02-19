@@ -15,7 +15,7 @@
             [ssorter.model.membership :as m.membership]
             [ssorter.model.sorted :as m.sorted]
             [ssorter.model.integrations.linear :as m.i.linear]
-            [ssorter.pair :as pair]
+            [ssorter.model.pairs :as m.pairs]
             
             [clojure.walk]))
 
@@ -32,7 +32,7 @@
                     m.items/resolvers
                     m.tags/resolvers
                     m.sorted/resolvers
-                    pair/resolvers
+                    m.pairs/resolvers
                     m.i.linear/resolvers
                     m.membership/resolvers])
 
