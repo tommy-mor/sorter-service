@@ -23,8 +23,12 @@
 
 (defsc ItemList [this {:keys [list title]}]
   (if (empty? list)
-    (f/ui-table-body {} (f/ui-table-row {} (f/ui-segment {:placeholder true
-                                                          :attached true} (str "this tag has no " title " items"))))
+    (->> (str "this tag has no " title " items")
+         (f/ui-table-cell {:singleLine true})
+         (f/ui-table-row {:disabled true})
+         (f/ui-table-body {})
+         (f/ui-table {:fluid true :attached true}))
+    
     (->> (f/ui-table {:fluid true :attached true}
                      (f/ui-table-body {}
                                       (map ui-item list))))))
