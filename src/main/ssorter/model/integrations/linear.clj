@@ -154,6 +154,15 @@
 
   {:tags/id tagid})
 
+(pco/defresolver sorted-issues [env _]
+  {::pco/output [{::sorted-issues [::id
+                                   :tags/id]}]}
+  
+  {::sorted-issues (->> (exec! (-> (h/select :id :domain_pk)
+                                   (h/from :tags)
+                                   (h/where [:= :domain_pk_namespace "linear.issue"])))
+                        (map #(clojure.set/rename-keys % {:tags/domain_pk ::id})))})
+
 (pco/defresolver issues [env _]
   {::pco/output [{::issues [::id
                             ::title
@@ -162,11 +171,12 @@
                             ::estimate
                             ::priorityLabel
                             ::children
-                            ::identifier]}]}
+                            ::identifier
+                            :tags/id]}]}
   (let [{:keys [before after onlyParents?] :as param} (pco/params env)
         params (cond before {:before before :last 10}
-                   after {:after after :first 10}
-                   :else {:first 10})
+                     after {:after after :first 10}
+                     :else {:first 10})
 
         params (merge params
                       (when onlyParents? {:filter {:children {:length {:gt 0.0}}}}))]
@@ -180,13 +190,22 @@
                                            :estimate
                                            :identifier
                                            [:children [[:nodes [:id]]]]]]]]]})
-                  :data :issues :nodes wrap-keywords)]
-      (def x req)
-      {::issues (if before (reverse req) req)})))
+                  :data :issues :nodes wrap-keywords)
+          linearid->tagid (->> (exec! (-> (h/select :id :domain_pk)
+                                          (h/from :tags)
+                                          (h/where :in :domain_pk (map ::id req))
+                                          (h/where [:= :domain_pk_namespace "linear.issue"])))
+                               (map (juxt :tags/domain_pk :tags/id))
+                               (into {}))
+          req (if before (reverse req) req)
+          req (map #(let [id (::id %)
+                          tagid (linearid->tagid id)]
+                      (if linearid (assoc % :tags/id tagid) %)) req)]
+      {::issues req})))
 
-(comment (-> (issues) ::issues first ::id))
+(comment (->> (issues) ::issues (map ::title)))
 
-(def resolvers [issues start-sorting-issue])
+(def resolvers [issues start-sorting-issue sorted-issues])
 
 
 

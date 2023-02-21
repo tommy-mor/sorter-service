@@ -21,6 +21,23 @@
   (action [_] (println "running.."))
   (remote [env] true))
 
+(defsc SortedIssue [this props]
+  {:ident ::id
+   :query [::id :tags/id :tags/title :tags/edited_at]
+   :initial-state {}}
+  (let [opts {:singleLine true}
+        onclick
+        #(if (js/confirm "sort this issue?")
+           (transact! this [(start-sorting-issue {::id (::id props)})]))]
+    (f/ui-table-row {:positive true}
+                    (f/ui-table-cell opts "3 votes")
+                    (f/ui-table-cell opts (:tags/title props))
+                    (f/ui-table-cell opts (datetime (:tags/edited_at props)))
+                    (f/ui-table-cell opts (dom/a {:onClick onclick :href "#"} (::identifier props)))
+                    (f/ui-table-cell opts (::title props)))))
+
+(def ui-sorted-issue (comp/factory SortedIssue {:keyfn ::id}))
+
 (defsc Issue [this props]
   {:ident ::id
    :query [::id ::title ::createdAt ::priorityLabel ::children ::identifier]
@@ -46,12 +63,19 @@
             {:params (assoc params :onlyParents? true)
              :target (targeting/replace-at
                       [:component/id :IssueList ::issues])
+             :marker ::spinner})
+  
+  (df/load! app ::sorted-issues SortedIssue
+            {:target (targeting/replace-at
+                      [:component/id :IssueList ::sorted-issues])
              :marker ::spinner}))
 
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
-   :initial-state {::issues []}
+   :initial-state {::issues []
+                   ::sorted-issues []}
    :query [{::issues (comp/get-query Issue)}
+           {::sorted-issues (comp/get-query SortedIssue)}
            [df/marker-table ::spinner]]}
   (def props props)
 
@@ -72,7 +96,9 @@
                           (f/ui-table-row nil)
                           (f/ui-table-header nil))
                      (f/ui-table-body nil
-                                      (map ui-issue (::issues props)))
+                                      (concat
+                                       (map ui-sorted-issue (::sorted-issues props))
+                                       (map ui-issue (::issues props))))
                      (->>
                       (f/ui-menu {:pagination true
                                   :size "mini"
