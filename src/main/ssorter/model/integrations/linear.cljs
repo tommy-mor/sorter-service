@@ -56,19 +56,35 @@
 
 (def ui-issue (comp/factory Issue {:keyfn ::id}))
 
-
-(defn load [app & [params]]
-  ;; TODO do a pre merge filter so i don't merge in empty list..
+(defn load-unsorted-issues! [app & [params]]
   (df/load! app ::issues Issue
             {:params (assoc params :onlyParents? true)
              :target (targeting/replace-at
                       [:component/id :IssueList ::issues])
-             :marker ::spinner})
+             :marker ::spinner}))
+
+(defn load [app & [params]]
+  ;; TODO do a pre merge filter so i don't merge in empty list..
+  (load-unsorted-issues! app params)
   
   (df/load! app ::sorted-issues SortedIssue
             {:target (targeting/replace-at
                       [:component/id :IssueList ::sorted-issues])
              :marker ::spinner}))
+
+(m/defmutation page-turn [params]
+  (action [env]
+          (def x env)
+          (let [comp (:component env)
+                page (-> comp comp/get-state ::page)]
+            (case (:dir params)
+              :left (do
+                      (load comp {:before (-> params ::issues first ::id)})
+                      (comp/set-state! comp {::page (dec page)}))
+              :right (do
+                       (load comp {:after (-> params ::issues last ::id)})
+                       (comp/set-state! comp {::page (inc page)}))))
+          (swap! (:state x) assoc-in [:component/id :IssueList ::issues] [])))
 
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
@@ -76,17 +92,23 @@
                    ::sorted-issues []}
    :query [{::issues (comp/get-query Issue)}
            {::sorted-issues (comp/get-query SortedIssue)}
-           [df/marker-table ::spinner]]}
+           [df/marker-table ::spinner]]
+   
+   :initLocalState (fn [_ _] {::page 0})}
+  
   (def props props)
-
-  (let [left-arrow
+  (let [sorted-ids (->> props ::sorted-issues (map ::id) set)
+        page (comp/get-state this ::page)
+        _ (println "page " page)
+        left-arrow
         (f/ui-menu-item {:as "a"
-                         :onClick
-                         #(load this {:before (-> props ::issues first ::id)})} "<")
+                         :disabled (= page 0)
+                         :onClick #(transact! this [(page-turn {:dir :left
+                                                                ::issues (::issues props)})])} "<")
         right-arrow
         (f/ui-menu-item {:as "a"
-                         :onClick
-                         #(load this {:after (-> props ::issues last ::id)})} ">")
+                         :onClick #(transact! this [(page-turn {:dir :right
+                                                                ::issues (::issues props)})])} ">")
 
         spinner (df/loading? (get props [df/marker-table ::spinner]))]
     (->> (f/ui-table {:celled true :striped true :compact true}
@@ -97,8 +119,12 @@
                           (f/ui-table-header nil))
                      (f/ui-table-body nil
                                       (concat
-                                       (map ui-sorted-issue (::sorted-issues props))
-                                       (map ui-issue (::issues props))))
+                                       (when (= page 0)
+                                         (map ui-sorted-issue (::sorted-issues props)))
+                                       (->> props
+                                            ::issues
+                                            (filter (comp not sorted-ids ::id))
+                                            (map ui-issue))))
                      (->>
                       (f/ui-menu {:pagination true
                                   :size "mini"
