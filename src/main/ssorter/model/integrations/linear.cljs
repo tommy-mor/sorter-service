@@ -84,7 +84,9 @@
               :right (do
                        (load comp {:after (-> params ::issues last ::id)})
                        (comp/set-state! comp {::page (inc page)}))))
-          (swap! (:state x) assoc-in [:component/id :IssueList ::issues] [])))
+          (swap! (:state x) #(-> %
+                                 (assoc-in [:component/id :IssueList ::issues] [])
+                                 (assoc-in [:component/id :Sorted ::sorted-issues] [])))))
 
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
@@ -99,7 +101,6 @@
   (def props props)
   (let [sorted-ids (->> props ::sorted-issues (map ::id) set)
         page (comp/get-state this ::page)
-        _ (println "page " page)
         left-arrow
         (f/ui-menu-item {:as "a"
                          :disabled (= page 0)
