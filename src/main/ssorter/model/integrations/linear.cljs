@@ -64,29 +64,44 @@
              :marker ::spinner}))
 
 (defn load [app & [params]]
+  
   ;; TODO do a pre merge filter so i don't merge in empty list..
   (load-unsorted-issues! app params)
+  (def app app)
+  (def params params)
   
-  (df/load! app ::sorted-issues SortedIssue
-            {:target (targeting/replace-at
-                      [:component/id :IssueList ::sorted-issues])
-             :marker ::spinner}))
+  (when-not (or (:before params) (:after params))
+      (df/load! app ::sorted-issues SortedIssue
+             {:target (targeting/replace-at
+                       [:component/id :IssueList ::sorted-issues])
+              :marker ::spinner})))
 
 (m/defmutation page-turn [params]
   (action [env]
           (def x env)
+
           (let [comp (:component env)
-                page (-> comp comp/get-state ::page)]
-            (case (:dir params)
-              :left (do
-                      (load comp {:before (-> params ::issues first ::id)})
-                      (comp/set-state! comp {::page (dec page)}))
-              :right (do
-                       (load comp {:after (-> params ::issues last ::id)})
-                       (comp/set-state! comp {::page (inc page)}))))
-          (swap! (:state x) #(-> %
-                                 (assoc-in [:component/id :IssueList ::issues] [])
-                                 (assoc-in [:component/id :Sorted ::sorted-issues] [])))))
+                {::keys [page page->ids]} (comp/get-state comp)
+                data (-> x :state deref :component/id :IssueList)
+                
+                
+                newpage (case (:dir params) :left (dec page) :right (inc page))
+                cached (page->ids newpage)
+                newdata (if (nil? cached) {::sorted-issues [] ::issues []} cached)]
+            
+            (when (empty? (::issues newdata))
+              (case (:dir params)
+                :left (load comp {:before (-> params ::issues first ::id)})
+                :right (load comp {:after (-> params ::issues last ::id)})))
+            
+            (comp/set-state! comp
+                             {::page newpage ::page->ids (assoc page->ids page data)})
+
+            (swap! (:state x) #(-> %
+                                   (assoc-in [:component/id :IssueList ] newdata))))))
+
+(comment (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
+                                      {:key "tom-315" :content "tom-315" :link true}]}))
 
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
@@ -96,7 +111,8 @@
            {::sorted-issues (comp/get-query SortedIssue)}
            [df/marker-table ::spinner]]
    
-   :initLocalState (fn [_ _] {::page 0})}
+   :initLocalState (fn [_ _] {::page 0
+                              ::page->ids {}})}
   
   (def props props)
   (let [sorted-ids (->> props ::sorted-issues (map ::id) set)
@@ -113,14 +129,13 @@
 
         spinner (df/loading? (get props [df/marker-table ::spinner]))]
     (->> (f/ui-table {:celled true :striped true :compact true}
-                     (->> (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
-                                                       {:key "tom-315" :content "tom-315" :link true}]})
+                     (->> "Issues"
                           (f/ui-table-header-cell {:colSpan 100} (f/ui-loader {:active spinner}))
                           (f/ui-table-row nil)
                           (f/ui-table-header nil))
                      (f/ui-table-body nil
                                       (concat
-                                       (when (= page 0)
+                                       (when (::sorted-issues props)
                                          (map ui-sorted-issue (::sorted-issues props)))
                                        (->> props
                                             ::issues

@@ -33,10 +33,13 @@
   (div
    #_(dom/pre (with-out-str (cljs.pprint/pprint props)))
    (->> (f/ui-tab {:menu {:fluid true :vertical true}
-                   :panes (concat [{:menuItem "linear/issues"
-                                    :render
-                                    (fn [] (comp/with-parent-context this
-                                             (linear/ui-issue-list (:root/issues props))))}]
-                                  (panes-from-tags this (-> props :root/tags :tags)))})
+                   :panes [{:menuItem "linear/issues"
+                            :render
+                            (fn [] (comp/with-parent-context this
+                                     (linear/ui-issue-list (:root/issues props))))}
+                           {:menuItem "youtube/playlists"
+                            :render (fn [] "erm")}
+                           {:menuItem "reddit/comments"
+                            :render (fn [] "uhh")}]})
         (f/ui-container nil)
         (f/ui-segment {:style {:padding "8em 0em"} :vertical true}))))
