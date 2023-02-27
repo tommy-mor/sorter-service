@@ -1,6 +1,5 @@
 (ns ssorter.client.ui
   (:require 
-   [ssorter.client.mutations :as mut]
    [ssorter.model.integrations.linear :as linear]
    [ssorter.model.tags :as m.tags]
    
@@ -28,14 +27,6 @@
     (div "unknown route")))
 
 (def ui-root-router (comp/factory RootRouter))
-
-(defn panes-from-tags [this tags]
-  (vec (for [tag tags]
-         {:menuItem
-          (-> tag :tags/title (truncate 50))
-          :render (fn []
-                    (comp/with-parent-context this
-                      (m.tags/ui-tag tag)))})))
 
 (defsc Root [this props]
   {:query [{:root/router (comp/get-query RootRouter)}]

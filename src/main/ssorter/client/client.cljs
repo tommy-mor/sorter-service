@@ -23,20 +23,11 @@
   (app/mount! app
               (app/root-class app)
               "app"
-              {:initialize-state? false})
-  
-  (comment (m.tags/load app)
-           (linear/load app)))
+              {:initialize-state? false}))
 
 (defn ^:export refresh
   "Called by shadow-cljs upon initialization, see shadow-cljs.edn"
   []
   (println "refreshing app...")
   (comp/refresh-dynamic-queries! app)
-  (app/mount! app (app/root-class app) "app")
-  (comment (m.tags/load app)
-           (linear/load app)))
-
-
-
-
+  (app/mount! app (app/root-class app) "app"))

@@ -1,7 +1,5 @@
 (ns ssorter.model.integrations.linear
   (:require 
-   [ssorter.client.mutations :as mut]
-   
    [com.fulcrologic.fulcro.algorithms.merge :as merge]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
@@ -18,10 +16,6 @@
    [com.fulcrologic.semantic-ui.factories :as f]
    [clojure.contrib.humanize :refer [datetime]]))
 
-(m/defmutation start-sorting-issue [params]
-  (action [_] (println "running.."))
-  (remote [env] true))
-
 (defsc SortedIssue [this props]
   {:ident ::id
    :query [::id :tags/id :tags/title :tags/edited_at]
@@ -29,7 +23,7 @@
   (let [opts {:singleLine true}
         onclick
         #(if (js/confirm "sort this issue?")
-           (transact! this [(start-sorting-issue {::id (::id props)})]))]
+           "epic")]
     (f/ui-table-row {:style {:cursor "pointer"}
                      :positive true}
                     (f/ui-table-cell opts "3 votes")
@@ -47,7 +41,7 @@
   (let [opts {:singleLine true}
         onclick
         #(if (js/confirm "sort this issue?")
-           (transact! this [(start-sorting-issue {::id (::id props)})]))]
+           "epic")]
     (f/ui-table-row nil
                     (f/ui-table-cell opts (dom/a {:onClick onclick :href "#"} (::identifier props)))
                     (f/ui-table-cell opts (::title props))
@@ -67,12 +61,9 @@
 
 (m/defmutation page-turn [params]
   (action [env]
-          (def x env)
-          (def params params)
-          (-> params keys)
           (let [comp (:component env)
                 {::keys [page page->ids]} (comp/get-state comp)
-                data (-> x :state deref :component/id :IssueList)
+                data (-> env :state deref :component/id :IssueList)
                 
                 
                 newpage (case (:dir params) :left (dec page) :right (inc page))
@@ -87,8 +78,8 @@
             (comp/set-state! comp
                              {::page newpage ::page->ids (assoc page->ids page data)})
 
-            (swap! (:state x) #(-> %
-                                   (assoc-in [:component/id :IssueList ] newdata))))))
+            (swap! (:state env) #(-> %
+                                     (assoc-in [:component/id :IssueList ] newdata))))))
 
 (comment (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
                                       {:key "tom-315" :content "tom-315" :link true}]}))
@@ -112,11 +103,16 @@
    ;; routing
    :route-segment ["linear.issues"]
    :will-enter (fn [app route-params]
-                 (df/load! app ::sorted-issues SortedIssue
-                           {:target (targeting/replace-at
-                                     [:component/id :IssueList ::sorted-issues])
-                            :marker ::spinner})
-                 (dr/route-immediate [:component/id :IssueList]))}
+                 (println "will-enter..")
+                 (dr/route-deferred
+                  [:component/id :IssueList]
+                  #(df/load! app ::sorted-issues SortedIssue
+                             {:target (targeting/replace-at
+                                       [:component/id :IssueList ::sorted-issues])
+                              :marker ::spinner
+
+                              :post-mutation `dr/target-ready
+                              :post-mutation-params {:target [:component/id :IssueList]}})))}
   
   (def props props)
   (let [sorted-ids (->> props ::sorted-issues (map ::id) set)
@@ -129,6 +125,8 @@
                                                                 ::issues (::issues props)})])} "<")
         right-arrow
         (f/ui-menu-item {:as "a"
+                         :disabled (> 10 (+ (count (::issues props))
+                                             (count (::sorted-issues props))))
                          :onClick #(transact! this [(page-turn {:dir :right
                                                                 ::issues (::issues props)})])} ">")
 
