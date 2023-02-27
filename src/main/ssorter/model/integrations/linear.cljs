@@ -33,9 +33,9 @@
                      :positive true}
                     (f/ui-table-cell opts "3 votes")
                     (f/ui-table-cell opts (:tags/title props))
+                    (f/ui-table-cell opts nil)
                     (f/ui-table-cell opts (datetime (:tags/edited_at props)))
-                    (f/ui-table-cell opts (dom/a {:onClick onclick :href "#"} (::identifier props)))
-                    (f/ui-table-cell opts (::title props)))))
+                    (f/ui-table-cell opts (dom/a {:onClick onclick :href "#"} (::identifier props))))))
 
 (def ui-sorted-issue (comp/factory SortedIssue {:keyfn ::id}))
 
@@ -106,8 +106,9 @@
 
 (m/defmutation load-more [params]
   (action [env]
-          (def x env)
-          (:state x)))
+          (load-unsorted-issues! (:app env))
+          (comp/set-state! (:component env) {::loaded-unsorted? true})
+          (:state env)))
 
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
@@ -124,6 +125,8 @@
   (def props props)
   (let [sorted-ids (->> props ::sorted-issues (map ::id) set)
         page (comp/get-state this ::page)
+        loaded-unsorted? (comp/get-state this ::loaded-unsorted?)
+        
         left-arrow
         (f/ui-menu-item {:as "a"
                          :disabled (= page 0)
@@ -149,16 +152,19 @@
                                             (filter (comp not sorted-ids ::id))
                                             (map ui-issue))
                                        [
-                                        (f/ui-table-row {:style {:cursor "pointer"}}
-                                                        (f/ui-table-cell {:icon
-                                                                          (f/ui-icon {:fitted true
-                                                                                      :name "arrow circle down"} )
-                                                                          :width 4})
-                                                        (f/ui-table-cell {}
-                                                                         "load more issues from linear")
-                                                        (f/ui-table-cell {})
-                                                        (f/ui-table-cell {})
-                                                        (f/ui-table-cell {}))
+                                        (when (not loaded-unsorted?)
+                                            (f/ui-table-row {:key :load-more
+                                                             :style {:cursor "pointer"}
+                                                             :onClick #(transact! this [(load-more {})])}
+                                                            (f/ui-table-cell {:icon
+                                                                              (f/ui-icon {:fitted true
+                                                                                          :name "arrow circle down"} )
+                                                                              :width 4})
+                                                            (f/ui-table-cell {}
+                                                                             (div "load more issues from linear"))
+                                                            (f/ui-table-cell {})
+                                                            (f/ui-table-cell {})
+                                                            (f/ui-table-cell {})))
                                         
                                         ]))
                      (->>
