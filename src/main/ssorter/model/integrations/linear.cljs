@@ -29,7 +29,8 @@
         onclick
         #(if (js/confirm "sort this issue?")
            (transact! this [(start-sorting-issue {::id (::id props)})]))]
-    (f/ui-table-row {:positive true}
+    (f/ui-table-row {:style {:cursor "pointer"}
+                     :positive true}
                     (f/ui-table-cell opts "3 votes")
                     (f/ui-table-cell opts (:tags/title props))
                     (f/ui-table-cell opts (datetime (:tags/edited_at props)))
@@ -63,24 +64,24 @@
                       [:component/id :IssueList ::issues])
              :marker ::spinner}))
 
-(defn load [app & [params]]
+(defn load-sorted-issues! [app & [params]]
   
   ;; TODO do a pre merge filter so i don't merge in empty list..
-  (load-unsorted-issues! app params)
-  (def app app)
-  (def params params)
-  
-  (when-not (or (:before params) (:after params))
-      (df/load! app ::sorted-issues SortedIssue
-             {:target (targeting/replace-at
-                       [:component/id :IssueList ::sorted-issues])
-              :marker ::spinner})))
+  (df/load! app ::sorted-issues SortedIssue
+            {:target (targeting/replace-at
+                      [:component/id :IssueList ::sorted-issues])
+             :marker ::spinner}))
+
+(defn load [app & [params]]
+  #_(load-unsorted-issues! app params)
+  (load-sorted-issues! app params))
 
 (m/defmutation page-turn [params]
   (action [env]
-          (def x env)
+          
 
-          (let [comp (:component env)
+          (let [x env
+                comp (:component env)
                 {::keys [page page->ids]} (comp/get-state comp)
                 data (-> x :state deref :component/id :IssueList)
                 
@@ -103,6 +104,11 @@
 (comment (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
                                       {:key "tom-315" :content "tom-315" :link true}]}))
 
+(m/defmutation load-more [params]
+  (action [env]
+          (def x env)
+          (:state x)))
+
 (defsc IssueList [this props]
   {:ident (fn []  [:component/id :IssueList])
    :initial-state {::issues []
@@ -112,7 +118,8 @@
            [df/marker-table ::spinner]]
    
    :initLocalState (fn [_ _] {::page 0
-                              ::page->ids {}})}
+                              ::page->ids {}
+                              ::loaded-unsorted? false})}
   
   (def props props)
   (let [sorted-ids (->> props ::sorted-issues (map ::id) set)
@@ -128,7 +135,7 @@
                                                                 ::issues (::issues props)})])} ">")
 
         spinner (df/loading? (get props [df/marker-table ::spinner]))]
-    (->> (f/ui-table {:celled true :striped true :compact true}
+    (->> (f/ui-table {:celled true :striped true :compact true :selectable true}
                      (->> "Issues"
                           (f/ui-table-header-cell {:colSpan 100} (f/ui-loader {:active spinner}))
                           (f/ui-table-row nil)
@@ -140,7 +147,20 @@
                                        (->> props
                                             ::issues
                                             (filter (comp not sorted-ids ::id))
-                                            (map ui-issue))))
+                                            (map ui-issue))
+                                       [
+                                        (f/ui-table-row {:style {:cursor "pointer"}}
+                                                        (f/ui-table-cell {:icon
+                                                                          (f/ui-icon {:fitted true
+                                                                                      :name "arrow circle down"} )
+                                                                          :width 4})
+                                                        (f/ui-table-cell {}
+                                                                         "load more issues from linear")
+                                                        (f/ui-table-cell {})
+                                                        (f/ui-table-cell {})
+                                                        (f/ui-table-cell {}))
+                                        
+                                        ]))
                      (->>
                       (f/ui-menu {:pagination true
                                   :size "mini"
