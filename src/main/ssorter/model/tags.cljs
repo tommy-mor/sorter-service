@@ -54,7 +54,9 @@
            :tags/slug
            {:tags/sorted (comp/get-query Sorted)}
            {:tags/pair (comp/get-query m.pairs/Pair)}
-           {:tags/votes (comp/get-query m.votes/Vote)}]}
+           {:tags/votes (comp/get-query m.votes/Vote)}]
+
+   :route-segment ["tag" :tags/id]}
   (f/ui-container {}
                   (f/ui-segment {}
                                 (f/ui-header {:as "h2"}

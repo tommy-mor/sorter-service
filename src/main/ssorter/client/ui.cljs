@@ -17,14 +17,52 @@
    [com.fulcrologic.semantic-ui.factories :as f]
    [clojure.contrib.humanize :refer [truncate]]))
 
+(defn thing [all]
+  (loop [out []
+         current []]
+    (if (= current all)
+      out
+      (let [letter (first (drop (count current) all))]
+        (recur (conj out (conj current letter))
+               (conj current letter))))))
+
+(comment
+  (thing ["a" "b" "c"]) ;= [["a"] ["a" "b"] ["a" "b" "c"]] 
+  )
+
+(defn segment-maps [segments]
+  (map
+   (fn [text link]
+     {:key text :content text :link true})
+   segments
+   (thing segments)))
+
+(comment (segment-maps (->> xx :router-state :path-segment)))
+
+(comment
+  
+  )
+
 (defrouter RootRouter [this props]
-  {:router-targets [linear/IssueList]}
-  (case (:current-state props)
-    :pending (div "pending")
-    :failed (div "failed")
-    
-    
-    (div "unknown route")))
+  {:router-targets [linear/IssueList m.tags/Tag]
+   :always-render-body? true}
+  (def xx props)
+  (comp/fragment
+   (f/ui-segment {} (f/ui-breadcrumb {}
+                                     (let [segments (-> props :router-state :path-segment)]
+                                       (when segments
+                                         (->> (map (fn [title link]
+                                                     (f/ui-breadcrumb-section {:link true
+                                                                               :key title
+                                                                               :onClick #(dr/change-route! this link)} title))
+                                                   segments
+                                                   (thing  segments))
+                                              (interleave (map #(f/ui-breadcrumb-divider {:key %}) (range)))
+                                              (drop 1))))))
+   (when (not= :routed (:current-state props))
+     (div "pending"))
+   (when-let [route-factory (:route-factory props)]
+     (route-factory (comp/computed (:route-props props) (comp/get-computed this))))))
 
 (def ui-root-router (comp/factory RootRouter))
 
@@ -32,6 +70,7 @@
   {:query [{:root/router (comp/get-query RootRouter)}]
    :initial-state {:root/router {}}}
 
+  (def x props)
   (let [render (fn [] (comp/with-parent-context this
                         (ui-root-router (:root/router props))))]
     

@@ -21,16 +21,15 @@
    :query [::id :tags/id :tags/title :tags/edited_at]
    :initial-state {}}
   (let [opts {:singleLine true}
-        onclick
-        #(if (js/confirm "sort this issue?")
-           "epic")]
+        onclick #(dr/change-route this ["tag" (:tags/id props)])]
     (f/ui-table-row {:style {:cursor "pointer"}
-                     :positive true}
+                     :positive true
+                     :onClick onclick}
                     (f/ui-table-cell opts "3 votes")
                     (f/ui-table-cell opts (:tags/title props))
                     (f/ui-table-cell opts nil)
                     (f/ui-table-cell opts (datetime (:tags/edited_at props)))
-                    (f/ui-table-cell opts (dom/a {:onClick onclick :href "#"} (::identifier props))))))
+                    (f/ui-table-cell opts nil))))
 
 (def ui-sorted-issue (comp/factory SortedIssue {:keyfn ::id}))
 
@@ -80,9 +79,6 @@
 
             (swap! (:state env) #(-> %
                                      (assoc-in [:component/id :IssueList ] newdata))))))
-
-(comment (f/ui-breadcrumb {:sections [{:key "issues" :content "issues"}
-                                      {:key "tom-315" :content "tom-315" :link true}]}))
 
 (m/defmutation load-more [params]
   (action [env]
