@@ -23,7 +23,6 @@
 (defsc Item [this props]
   {:ident :items/id
    :query [:items/id :items/title :items/score]}
-  (def props props)
   (let [opts {:singleLine true}]
     (f/ui-table-row {}
                     (f/ui-table-cell opts (truncate (str (:items/score props)) 5 ""))
@@ -32,15 +31,28 @@
 (def ui-item (comp/factory Item {:keyfn :items/id}))
 
 (defsc ItemList [this {:keys [list title]}]
-  (if (empty? list)
-    (->> (str "this tag has no " title " items")
-         (f/ui-table-cell {:singleLine true})
-         (f/ui-table-row {:disabled true})
-         (f/ui-table-body {})
-         (f/ui-table {:attached true}))
-    
-    (->> (f/ui-table {:attached true}
-                     (f/ui-table-body {}
-                                      (map ui-item list))))))
+  (let [llist list]
+    (def llist llist)
+    (if (empty? llist)
+      (->> (str "this tag has no " title " items")
+           (f/ui-table-cell {:singleLine true})
+           (f/ui-table-row {:disabled true})
+           (f/ui-table-body {})
+           (f/ui-table {:attached true}))
+
+      (->> (f/ui-table {:attached true}
+                       (f/ui-table-body {}
+                                        (if (every? :items/score llist)
+                                          (drop-last 1 (interleave (map ui-item llist)
+                                                                   (map #(let [score1 (:items/score %1)
+                                                                               score2 (:items/score %2)
+                                                                               pixels (* 100 (- score1 score2))]
+                                                                           (println pixels)
+                                                                           (dom/div {:style {:backgroundColor "lightgray"
+                                                                                             :height (str pixels "px")}
+                                                                                     :key (str "spacer/" (:items/id %1))}))
+                                                                        llist
+                                                                        (cycle (drop 1 llist)))))
+                                          (map ui-item llist))))))))
 
 (def ui-item-list (comp/factory ItemList))

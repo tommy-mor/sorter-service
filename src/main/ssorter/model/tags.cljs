@@ -42,7 +42,7 @@
                                           (str "unsorted ("
                                                (count (:sorted/unsorted props))
                                                ")"))
-                    (f/ui-accordion-content {:active (= 1 segment)
+                    #_(f/ui-accordion-content {:active (= 1 segment)
                                              :style {:padding 0}}
                                             (m.items/ui-item-list {:list (:sorted/unsorted props)
                                                                    :title "unsorted"})))))
