@@ -24,14 +24,21 @@
 
 (comment (tags))
 
+(pco/defresolver tag-param [env _]
+  {::pco/output [:tags/id]}
+  (let [params (pco/params env)
+        tagid (:tags/id params)]
+    (when tagid
+      {:tags/id tagid})))
+
 (pco/defresolver tag [env {:keys [:tags/id]}]
   {::pco/input [:tags/id]
    ::pco/output [:tags/title :tags/description]}
-  (assert (number? id))
-  (def x id)
   (first (exec! (-> (h/select :*)
                     (h/from :tags)
                     (h/where [:= :id id])))))
+
+(comment (tag {:tags/id 37}))
 
 (defn create-tag [new-tag]
   (assert (nil? (:tags/id new-tag)))
@@ -141,6 +148,7 @@
                 items-in-namespace
                 votes-in-namespace
                 
+                tag-param
                 tags tag create update delete])
 
 

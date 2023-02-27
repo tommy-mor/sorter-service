@@ -76,7 +76,8 @@
   
   (exec! (-> (h/delete-from :votes)
              (h/where [:= :id (:votes/id vote)])
-             (h/returning :id))))
+             (h/returning :id)))
+  {})
 
 (def resolvers [votes vote vote-fields left-item right-item
 

@@ -18,7 +18,9 @@
   (action [{:keys [state] :as env}]
           (println "sending vote.." (pr-str vote) )
           state)
-  (remote [env] (returning env 'ssorter.model.tags/Tag)))
+  (remote [env]
+          (def env env)
+          (returning env 'ssorter.model.tags/Tag {:query-params {:tags/id 71}})))
 
 (defsc Vote [this props]
   {:ident :votes/id
