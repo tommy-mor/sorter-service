@@ -9,6 +9,7 @@
    [com.fulcrologic.fulcro.mutations :as m]
    [com.fulcrologic.fulcro.components :as comp :refer [defsc transact!]]
    [com.fulcrologic.fulcro.raw.components :as rc]
+   [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
    [com.fulcrologic.fulcro.data-fetch :as df]    
    [com.fulcrologic.fulcro.dom :as dom
     :refer
@@ -64,18 +65,6 @@
                       [:component/id :IssueList ::issues])
              :marker ::spinner}))
 
-(defn load-sorted-issues! [app & [params]]
-  
-  ;; TODO do a pre merge filter so i don't merge in empty list..
-  (df/load! app ::sorted-issues SortedIssue
-            {:target (targeting/replace-at
-                      [:component/id :IssueList ::sorted-issues])
-             :marker ::spinner}))
-
-(defn load [app & [params]]
-  #_(load-unsorted-issues! app params)
-  (load-sorted-issues! app params))
-
 (m/defmutation page-turn [params]
   (action [env]
           (def x env)
@@ -118,7 +107,16 @@
            [df/marker-table ::spinner]]
    
    :initLocalState (fn [_ _] {::page 0
-                              ::page->ids {}})}
+                              ::page->ids {}})
+
+   ;; routing
+   :route-segment ["linear.issues"]
+   :will-enter (fn [app route-params]
+                 (df/load! app ::sorted-issues SortedIssue
+                           {:target (targeting/replace-at
+                                     [:component/id :IssueList ::sorted-issues])
+                            :marker ::spinner})
+                 (dr/route-immediate [:component/id :IssueList]))}
   
   (def props props)
   (let [sorted-ids (->> props ::sorted-issues (map ::id) set)

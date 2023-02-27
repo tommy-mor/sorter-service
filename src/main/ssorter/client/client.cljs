@@ -19,13 +19,14 @@
   
   (app/set-root! app ui/Root {:initialize-state? true})
   (dr/initialize! app)
+  (dr/change-route! app ["linear.issues"])
   (app/mount! app
               (app/root-class app)
               "app"
               {:initialize-state? false})
   
-  (m.tags/load app)
-  (linear/load app))
+  (comment (m.tags/load app)
+           (linear/load app)))
 
 (defn ^:export refresh
   "Called by shadow-cljs upon initialization, see shadow-cljs.edn"
@@ -33,8 +34,8 @@
   (println "refreshing app...")
   (comp/refresh-dynamic-queries! app)
   (app/mount! app (app/root-class app) "app")
-  (m.tags/load app)
-  (linear/load app))
+  (comment (m.tags/load app)
+           (linear/load app)))
 
 
 
