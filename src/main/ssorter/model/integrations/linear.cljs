@@ -78,10 +78,10 @@
 
 (m/defmutation page-turn [params]
   (action [env]
-          
-
-          (let [x env
-                comp (:component env)
+          (def x env)
+          (def params params)
+          (-> params keys)
+          (let [comp (:component env)
                 {::keys [page page->ids]} (comp/get-state comp)
                 data (-> x :state deref :component/id :IssueList)
                 
@@ -92,8 +92,8 @@
             
             (when (empty? (::issues newdata))
               (case (:dir params)
-                :left (load comp {:before (-> params ::issues first ::id)})
-                :right (load comp {:after (-> params ::issues last ::id)})))
+                :left (load-unsorted-issues! comp {:before (-> params ::issues first ::id)})
+                :right (load-unsorted-issues! comp {:after (-> params ::issues last ::id)})))
             
             (comp/set-state! comp
                              {::page newpage ::page->ids (assoc page->ids page data)})
@@ -107,7 +107,6 @@
 (m/defmutation load-more [params]
   (action [env]
           (load-unsorted-issues! (:app env))
-          (comp/set-state! (:component env) {::loaded-unsorted? true})
           (:state env)))
 
 (defsc IssueList [this props]
@@ -119,13 +118,11 @@
            [df/marker-table ::spinner]]
    
    :initLocalState (fn [_ _] {::page 0
-                              ::page->ids {}
-                              ::loaded-unsorted? false})}
+                              ::page->ids {}})}
   
   (def props props)
   (let [sorted-ids (->> props ::sorted-issues (map ::id) set)
         page (comp/get-state this ::page)
-        loaded-unsorted? (comp/get-state this ::loaded-unsorted?)
         
         left-arrow
         (f/ui-menu-item {:as "a"
@@ -143,16 +140,19 @@
                           (f/ui-table-header-cell {:colSpan 100} (f/ui-loader {:active spinner}))
                           (f/ui-table-row nil)
                           (f/ui-table-header nil))
+                     
                      (f/ui-table-body nil
                                       (concat
                                        (when (::sorted-issues props)
                                          (map ui-sorted-issue (::sorted-issues props)))
+                                       
                                        (->> props
                                             ::issues
                                             (filter (comp not sorted-ids ::id))
                                             (map ui-issue))
                                        [
-                                        (when (not loaded-unsorted?)
+                                        (when (and (-> props ::issues empty?)
+                                                   (not spinner))
                                             (f/ui-table-row {:key :load-more
                                                              :style {:cursor "pointer"}
                                                              :onClick #(transact! this [(load-more {})])}
