@@ -16,6 +16,9 @@
    [com.wsscode.pathom3.interface.eql :as p.eql]
    [clojure.set]))
 
+(defn fix-elo [elo n]
+  (* elo n 10))
+
 (defn sorted-by-ids [ids]
   (def votes (exec! (-> (h/select :left_item_id :right_item_id :magnitude :id :attribute)
                         (h/from :votes)
@@ -26,7 +29,7 @@
                       flatten distinct set))
   {:sorted/sorted
    (vec (for [[item score] (rank/sorted (map #(hash-map :items/id %) valid-ids) votes)]
-          (assoc item :items/score score)))
+          (assoc item :items/score (fix-elo score (count valid-ids)))))
    :sorted/unsorted  (map #(hash-map :items/id %) (clojure.set/difference (set ids) valid-ids))
    :sorted/votes votes})
 
