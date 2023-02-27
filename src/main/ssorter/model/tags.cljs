@@ -73,7 +73,8 @@
                                 (:tags/slug props))
                   (ui-sorted (:tags/sorted props))
                   (m.pairs/ui-pair (:tags/pair props))
-                  (m.votes/ui-vote-list {:list (:tags/votes props)})))
+                  (m.votes/ui-vote-list {:list (:tags/votes props)
+                                         :tags/id (:tags/id props)})))
 
 (def ui-tag (comp/factory Tag))
 

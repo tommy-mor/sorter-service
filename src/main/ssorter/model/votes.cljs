@@ -1,5 +1,7 @@
 (ns ssorter.model.votes
   (:require
+   [ssorter.client.util :as util]
+   
    [com.fulcrologic.fulcro.mutations :refer [defmutation returning]]
    [com.fulcrologic.fulcro.components :as comp :refer [defsc transact!]]
    [com.fulcrologic.fulcro.dom :as dom
@@ -12,15 +14,14 @@
   (action [{:keys [state] :as env}]
           (println "sending vote.." (pr-str vote) )
           state)
-  (remote [env] (returning env 'ssorter.model.tags/Tag)))
+  (remote [env] (returning env 'ssorter.model.tags/Tag {:query-params {:tags/id (:tags/id vote)}})))
 
 (defmutation delete [vote]
   (action [{:keys [state] :as env}]
           (println "sending vote.." (pr-str vote) )
           state)
   (remote [env]
-          (def env env)
-          (returning env 'ssorter.model.tags/Tag {:query-params {:tags/id 71}})))
+          (returning env 'ssorter.model.tags/Tag {:query-params {:tags/id (:tags/id vote)}})))
 
 (defsc Vote [this props]
   {:ident :votes/id
@@ -29,16 +30,6 @@
            {:votes/right_item [:items/title]}
            :votes/magnitude
            :votes/edited_at]}
-  (def x props)
-  "{{{ NOT SURE HOW TO SOLVE CALLBACK PROBLEM: how to get these mutations to
-    refresh the entire tag. it is outside of their scope, so they should get a reload callback controlled by parent...
-    callback could be just a function that calls load! (these are merged/debounced? with mutations somehow..)
-
-    https://book.fulcrologic.com/#_mutations_that_trigger_one_or_more_loads
-
-
-   }}}"
-
   (f/ui-table-row {:selected (::selected props)}
                   (f/ui-table-cell {} (truncate (-> props :votes/left_item :items/title) 30))
                   (f/ui-table-cell {} (:votes/magnitude props))
@@ -51,14 +42,23 @@
 
 (def ui-vote (comp/factory Vote {:keyfn :votes/id}))
 
-(defsc VoteList [this {:keys [list]}]
-  {:initLocalState (fn [_ _] {::selected nil})}
+(defsc VoteList [this {:keys [list] :as props}]
+  {:initLocalState (fn [_ _] {::expanded? false})}
   
-  (->>
-   (for [vote (reverse list)]
-     (ui-vote vote))
-   (f/ui-table-body {})
-   (f/ui-table {:selectable true})))
+  (let [expanded? (comp/get-state this ::expanded?)]
+    (->>
+     (concat (for [vote (if expanded?
+                          (reverse list)
+                          (take 3 (reverse list)))]
+               (ui-vote (if-let [tagid (:tags/id props)]
+                          (assoc vote :tags/id tagid)
+                          vote)))
+             (if (and (not expanded?) (> (count list) 3))
+               [(util/expand-row {:title (str "click here to show " (- (count list) 3) " more votes")
+                                  :onClick #(comp/set-state! this {::expanded? true})})]
+               []))
+     (f/ui-table-body {})
+     (f/ui-table {:selectable true}))))
 
 (def ui-vote-list (comp/factory VoteList))
 

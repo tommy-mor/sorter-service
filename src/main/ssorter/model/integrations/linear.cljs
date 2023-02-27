@@ -1,5 +1,7 @@
 (ns ssorter.model.integrations.linear
   (:require 
+   [ssorter.client.util :as util]
+   
    [com.fulcrologic.fulcro.algorithms.merge :as merge]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
@@ -122,7 +124,7 @@
         right-arrow
         (f/ui-menu-item {:as "a"
                          :disabled (> 10 (+ (count (::issues props))
-                                             (count (::sorted-issues props))))
+                                            (count (::sorted-issues props))))
                          :onClick #(transact! this [(page-turn {:dir :right
                                                                 ::issues (::issues props)})])} ">")
 
@@ -145,20 +147,8 @@
                                        [
                                         (when (and (-> props ::issues empty?)
                                                    (not spinner))
-                                            (f/ui-table-row {:key :load-more
-                                                             :style {:cursor "pointer"}
-                                                             :onClick #(transact! this [(load-more {})])}
-                                                            (f/ui-table-cell {:icon
-                                                                              (f/ui-icon {:fitted true
-                                                                                          :name "arrow circle down"} )
-                                                                              :width 4})
-                                                            (f/ui-table-cell {}
-                                                                             (div "load more issues from linear"))
-                                                            (f/ui-table-cell {})
-                                                            (f/ui-table-cell {})
-                                                            (f/ui-table-cell {})))
-                                        
-                                        ]))
+                                          (util/expand-row {:title "click here to load linear issues"
+                                                            :onClick #(transact! this [(load-more)])}))]))
                      (->>
                       (f/ui-menu {:pagination true
                                   :size "mini"

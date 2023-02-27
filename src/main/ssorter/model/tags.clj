@@ -34,6 +34,7 @@
 (pco/defresolver tag [env {:keys [:tags/id]}]
   {::pco/input [:tags/id]
    ::pco/output [:tags/title :tags/description]}
+  
   (first (exec! (-> (h/select :*)
                     (h/from :tags)
                     (h/where [:= :id id])))))
