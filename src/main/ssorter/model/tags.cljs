@@ -8,7 +8,9 @@
    [com.fulcrologic.fulcro.mutations :as m]
    [com.fulcrologic.fulcro.components :as comp :refer [defsc transact!]]
    [com.fulcrologic.fulcro.raw.components :as rc]
-   [com.fulcrologic.fulcro.data-fetch :as df]    
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   
+   [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
    [com.fulcrologic.fulcro.dom :as dom
     :refer
     [button div form h1 h2 h3 input label li ol p ul pre]]
@@ -56,7 +58,13 @@
            {:tags/pair (comp/get-query m.pairs/Pair)}
            {:tags/votes (comp/get-query m.votes/Vote)}]
 
-   :route-segment ["tag" :tags/id]}
+   :route-segment ["tag" :tag-id]
+   :will-enter (fn [app {:keys [tag-id]}]
+                 (when-let [tag-id (some-> tag-id (js/parseInt))]
+                   (dr/route-deferred [:tags/id tag-id]
+                                      #(df/load! app [:tags/id tag-id] Tag
+                                                 {:post-mutation `dr/target-ready
+                                                  :post-mutation-params {:target [:tags/id tag-id]}}))))}
   (f/ui-container {}
                   (f/ui-segment {}
                                 (f/ui-header {:as "h2"}

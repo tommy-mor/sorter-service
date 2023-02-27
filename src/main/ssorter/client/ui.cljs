@@ -30,19 +30,6 @@
   (thing ["a" "b" "c"]) ;= [["a"] ["a" "b"] ["a" "b" "c"]] 
   )
 
-(defn segment-maps [segments]
-  (map
-   (fn [text link]
-     {:key text :content text :link true})
-   segments
-   (thing segments)))
-
-(comment (segment-maps (->> xx :router-state :path-segment)))
-
-(comment
-  
-  )
-
 (defrouter RootRouter [this props]
   {:router-targets [linear/IssueList m.tags/Tag]
    :always-render-body? true}
@@ -72,17 +59,23 @@
 
   (def x props)
   (let [render (fn [] (comp/with-parent-context this
-                        (ui-root-router (:root/router props))))]
+                        (ui-root-router (:root/router props))))
+        nav-to (fn [route]
+                 "TODO"
+                 (dr/change-route! this route))]
     
     ;; TODO dr/change-route onclicks
     (div
      #_(dom/pre (with-out-str (cljs.pprint/pprint props)))
-     (->> (f/ui-tab {:menu {:fluid true :vertical true}
-                     :panes [{:menuItem "linear/issues"
-                              :render render}
-                             {:menuItem "youtube/playlists"
-                              :render render}
-                             {:menuItem "reddit/comments"
-                              :render render}]})
-          (f/ui-container nil)
-          (f/ui-segment {:style {:padding "8em 0em"} :vertical true})))))
+     (let [menu (f/ui-menu {:vertical true}
+                           (f/ui-menu-item {:link true
+                                            :onClick #(nav-to ["linear.issues"])} "linear/issues")
+                           (f/ui-menu-item {:link true
+                                            :onClick #(nav-to ["youtube.videos"])} "youtube"))]
+       (->> (f/ui-grid {}
+                       
+                       (f/ui-grid-column {:width 4} menu)
+                       (f/ui-grid-column {:width 12
+                                          :stretched true} (render)))
+            (f/ui-container nil)
+            (f/ui-segment {:style {:padding "8em 0em"} :vertical true}))))))
