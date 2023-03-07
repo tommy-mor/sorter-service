@@ -15,7 +15,9 @@
 
    
    [com.fulcrologic.semantic-ui.factories :as f]
-   [clojure.contrib.humanize :refer [truncate]]))
+   [clojure.contrib.humanize :refer [truncate]]
+   
+   [ssorter.model.integrations.linear-tag :as linear-tag]))
 
 (defn thing [all]
   (loop [out []
@@ -31,7 +33,7 @@
   )
 
 (defrouter RootRouter [this props]
-  {:router-targets [linear/IssueList m.tags/Tag]
+  {:router-targets [linear/IssueList m.tags/Tag linear-tag/LinearTag]
    :always-render-body? true}
   (def xx props)
   (comp/fragment

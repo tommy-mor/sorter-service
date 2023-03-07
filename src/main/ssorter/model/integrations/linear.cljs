@@ -41,10 +41,10 @@
    :initial-state {}}
   (let [opts {:singleLine true}
         onclick
-        #(if (js/confirm "sort this issue?")
-           "epic")]
-    (f/ui-table-row nil
-                    (f/ui-table-cell opts (dom/a {:onClick onclick :href "#"} (::identifier props)))
+        #(dr/change-route this ["tag.linear.issue" (::id props)])]
+    (f/ui-table-row {:style {:cursor "pointer"}
+                     :onClick onclick}
+                    (f/ui-table-cell opts (::identifier props))
                     (f/ui-table-cell opts (::title props))
                     (f/ui-table-cell opts (pr-str (-> props ::children ::nodes count)))
                     (f/ui-table-cell opts (datetime (::createdAt props)))

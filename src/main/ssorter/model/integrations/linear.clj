@@ -37,6 +37,7 @@
 
 (def linear-api "https://api.linear.app/graphql")
 (def linear-key (:linear/api (clojure.edn/read-string (slurp "secrets.edn"))))
+
 (alter-var-root #'org.httpkit.client/*default-client* (fn [_] sni-client/default-client))
 
 (defn linear-req [m & [arg]]

@@ -19,6 +19,9 @@
            
            st)))
 
+(comment
+  (parse-jdbc (:jdbc-url (clojure.edn/read-string (slurp "database/config.edn")))))
+
 (defstate db
   :start (let [cfg
                (or (:db/connectstring config)
