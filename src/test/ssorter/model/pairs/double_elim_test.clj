@@ -1,4 +1,4 @@
-(ns ssorter.model.pairs.double-elim
+(ns ssorter.model.pairs.double-elim-test
   (:require
    [clojure.test :refer [deftest is]]
    [ssorter.model.pairs.double-elim :as sut]
@@ -13,7 +13,11 @@
             2 "item b"
             3 "item c"})
 
+(deftest double-elim
+  (is (= 3 3)))
 
 
 
-(sut/testfn 33)
+
+(comment
+  (sut/testfn 33))
