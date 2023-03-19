@@ -1,6 +1,10 @@
 {:tasks
-  {test
-    {:task (shell "clojure -X:test")}
-   js
-    {:task (shell "npx shadow-cljs watch main")} }}
+ {test
+  {:task (shell "clojure -X:test")}
+  
+  js
+  {:task (shell "npx shadow-cljs watch main")}
+
+  jar
+  {:task (shell "clojure -T:build ci")}}}
 

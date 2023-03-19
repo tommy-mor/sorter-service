@@ -6,6 +6,7 @@ pr
 self_nodes
 !resources/pr
 !resources/self_nodes
+target/
 
 secrets.edn
 
