@@ -9,4 +9,11 @@
    [ssorter.server-components.pathom :refer [build-parser]]))
 
 
+(def items {1 "item a"
+            2 "item b"
+            3 "item c"})
+
+
+
+
 (sut/testfn 33)
