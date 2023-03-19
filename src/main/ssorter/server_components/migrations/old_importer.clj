@@ -1,4 +1,4 @@
-(ns ssorter.old-importer
+(ns ssorter.server-components.migrations.old-importer
   (:require [jsonista.core :as j]))
 
 (def mapper

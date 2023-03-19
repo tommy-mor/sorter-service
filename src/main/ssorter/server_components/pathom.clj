@@ -12,8 +12,10 @@
             [ssorter.model.votes :as m.votes]
             [ssorter.model.items :as m.items]
             [ssorter.model.tags :as m.tags]
+            [ssorter.model.membership :as m.membership]
             [ssorter.model.sorted :as m.sorted]
-            [ssorter.pair :as pair]
+            [ssorter.model.integrations.linear :as m.i.linear]
+            [ssorter.model.pairs :as m.pairs]
             
             [clojure.walk]))
 
@@ -30,7 +32,9 @@
                     m.items/resolvers
                     m.tags/resolvers
                     m.sorted/resolvers
-                    pair/resolvers])
+                    m.pairs/resolvers
+                    m.i.linear/resolvers
+                    m.membership/resolvers])
 
 
 (defn clean-exceptions "takes a pathom3 response, and looks for throwables. converts them to maps"
@@ -50,8 +54,8 @@
                 (pci/register all-resolvers)
                 (p.plugin/register plugins))]
     (log/info "building pathom3 parser")
-    (fn parser [{:keys [ring/request] :as env'} tx]
-      (clean-exceptions @(p.a.eql/process (merge env env') tx)))))
+    (fn parser [{:keys [ring/request] :as env'} starting-data tx]
+      (clean-exceptions @(p.a.eql/process (merge env env') starting-data tx)))))
 
 
 (defstate parser

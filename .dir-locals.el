@@ -2,7 +2,10 @@
 
 (
  (nil . 
-	  ((cider-clojure-cli-global-options . "-A:dev")
+	  ((cider-default-cljs-repl . shadow)
+	   (cider-shadow-default-options . ":main")
+	   (cider-shadow-watched-builds . (":main"))
+	   (cider-clojure-cli-global-options . "-A:dev")
 	   (eval . (progn
                (local-set-key (kbd "C-c C-r")
                  (lambda () 

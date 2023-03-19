@@ -1,6 +1,8 @@
 (ns ssorter.model.items
   (:require
    [ssorter.server-components.db :refer [exec!]]
+   [ssorter.model.utils :as utils]
+   
    [taoensso.timbre :as log]
    [honey.sql.helpers :as h]
    [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
@@ -15,12 +17,12 @@
   {:items (exec! (-> (h/select :id)
                      (h/from :items)))})
 
-(pco/defresolver item [env _]
+(pco/defresolver item-by-id [env _]
   {::pco/output [{:item [:items/id]}]}
   (let [params (pco/params env)]
-    {:item {:items/id (:items/id params)}}))
+    {:query.items/by-id {:items/id (:items/id params)}}))
 
-(pco/defresolver item-fields [env {:keys [:items/id]}]
+(pco/defresolver item [env {:keys [:items/id]}]
   {::pco/output [:items/slug
                  :items/domain_pk
                  :items/title
@@ -50,25 +52,39 @@
              (h/returning :id))))
 
 (pco/defmutation create-many [items]
-  (exec! (-> (h/insert-into :items)
-             (h/values (map create-item items))
-             (h/returning :id))))
+  (when (not-empty items)
+    (exec! (-> (h/insert-into :items)
+               (h/values (map create-item items))
+               (h/returning :id)))))
 
 (pco/defmutation update [item]
-  (assert (not (nil? (:items/id item))))
-  (exec! (-> (h/update :items)
-             (h/set (-> item
-                        (dissoc :items/id)
-                        (assoc :items/edited_at (java.util.Date.))))
-             (h/where [:= :id (:items/id item)])
-             (h/returning :id))))
+  (let [item (utils/fill-out-id :items item)]
+    (assert (not (nil? (:items/id item))))
 
-(pco/defmutation delete [{:items/keys [id]}]
-  (exec! (-> (h/delete-from :items)
-             (h/where [:= :id id])
-             (h/returning :id))))
+    (def x item)
+    (first (exec! (-> (h/update :items)
+                      (h/set (-> item
+                                 (dissoc :items/id)
+                                 (assoc :items/edited_at (java.util.Date.))))
+                      (h/where [:= :id (:items/id item)])
+                      (h/returning :id))))))
 
-(def resolvers [items item item-fields create create-many delete])
+(pco/defmutation delete [item]
+  (let [item (utils/fill-out-id :items item)
+        id (:items/id item)]
+    
+       (assert (:items/id item))
+       
+       ;; TODO delete votes referencing this item?
+       (exec! (-> (h/delete-from :items_in_tags)
+                  (h/where [:= :item_id id])
+                  (h/returning :tag_id)))
+       
+       (exec! (-> (h/delete-from :items)
+                  (h/where [:= :id id])
+                  (h/returning :id)))))
+
+(def resolvers [items item item-by-id create create-many delete])
 
 (comment
   (items {} {})
@@ -81,7 +97,7 @@
   (def item-id  (-> (get r `create)
                     first
                     :items/id))
-  (item-fields {} {:items/id item-id})
+  (item {} {:items/id item-id})
   (update {:items/id item-id :items/title "not as epic anymore"})
-  (item-fields {} {:items/id item-id})
+  (item {} {:items/id item-id})
   (delete {:items/id item-id}))
