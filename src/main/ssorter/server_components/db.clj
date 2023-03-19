@@ -20,14 +20,17 @@
            st)))
 
 (comment
-  (parse-jdbc (:jdbc-url (clojure.edn/read-string (slurp "database/config.edn")))))
+  (parse-jdbc (:jdbc-url (clojure.edn/read-string (slurp "database/config.edn"))))
+  (parse-jdbc "postgres://doadmin:AVNS_fhlhM10kDKeczNIDTRY@db-postgresql-nyc1-50127-do-user-911048-0.b.db.ondigitalocean.com:25060/sorter")
+  
+  )
 
 (defstate db
   :start (let [cfg
                (or (:db/connectstring config)
                    (clojure.edn/read-string (slurp "database/config.edn")))
 
-               [username password host port] (parse-jdbc (:jdbc-url cfg))
+               [username password host port database] (parse-jdbc (:jdbc-url cfg))
                with-defaults (merge {:auto-commit        true
                                      :read-only          false
                                      :connection-timeout 30000
@@ -42,7 +45,8 @@
                                      :username username
                                      :password password
                                      :server-name host
-                                     :port-number (Integer/parseInt port)}
+                                     :port-number (Integer/parseInt port)
+                                     :database-name database}
                                     cfg)]
            (def with-defaults with-defaults)
            (assert (:jdbc-url cfg))

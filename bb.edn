@@ -6,5 +6,8 @@
   {:task (shell "npx shadow-cljs watch main")}
 
   jar
-  {:task (shell "clojure -T:build ci")}}}
+  {:task (shell "clojure -T:build ci") }
+
+  up
+  {:task (shell "scp target/app.jar root@sorter.isnt.online:/root/app.jar")} }}
 
