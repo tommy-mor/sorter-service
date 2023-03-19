@@ -1,6 +1,7 @@
 (ns ssorter.model.integrations.linear-tag
   (:require 
    [ssorter.client.util :as util]
+   [ssorter.model.integrations.linear :as lin]
    
    [com.fulcrologic.fulcro.algorithms.merge :as merge]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
@@ -21,27 +22,27 @@
 (defsc LinearTag
   "a tag view f a linear tag that is unsorted/has no votes."
   [this props]
-  {:ident :ssorter.model.integrations.linear/id
-   :query [:ssorter.model.integrations.linear/id
-           :ssorter.model.integrations.linear/title]
+  {:ident ::lin/id
+   :query [::lin/id
+           ::lin/title]
 
    :route-segment ["tag.linear.issue" :issue-id]
    :will-enter (fn [app {:keys [issue-id]}]
-                 (dr/route-deferred [:ssorter.model.integrations.linear/id issue-id]
-                                    #(df/load! app [:ssorter.model.integrations.linear/id issue-id]
+                 (dr/route-deferred [::lin/id issue-id]
+                                    #(df/load! app [::lin/id issue-id]
                                                LinearTag
                                                {:post-mutation `dr/target-ready
                                                 :post-mutation-params {:target
-                                                                       [:ssorter.model.integrations.linear/id issue-id]}})))}
-  #_(f/ui-container {}
-                  (f/ui-segment {}
-                                (f/ui-header {:as "h2"}
-                                             (:tags/title props))
-                                (:tags/description props)
-                                (:tags/slug props))
-                  (ui-sorted (:tags/sorted props))
-                  (m.pairs/ui-pair (:tags/pair props))
-                  (m.votes/ui-vote-list {:list (:tags/votes props)
-                                         :tags/id (:tags/id props)}))
-  (dom/pre "epic"))
+                                                                       [::lin/id issue-id]}})))}
+  #_ (f/ui-container {}
+                     (f/ui-segment {}
+                                   (f/ui-header {:as "h2"}
+                                                (:tags/title props))
+                                   (:tags/description props)
+                                   (:tags/slug props))
+                     (ui-sorted (:tags/sorted props))
+                     (m.pairs/ui-pair (:tags/pair props))
+                     (m.votes/ui-vote-list {:list (:tags/votes props)
+                                            :tags/id (:tags/id props)}))
+  (dom/pre (pr-str props)))
 

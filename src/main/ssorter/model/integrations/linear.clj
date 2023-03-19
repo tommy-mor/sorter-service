@@ -71,6 +71,15 @@
   (-> (linear-req {:queries [[:issue {:id id} important-fields]]})
       :data :issue))
 
+(pco/defresolver single-issue-resolver [env {::keys [id]}]
+  {::pco/output [[::id
+                  ::title
+                  ::identifier
+                  ::description
+                  ::url]]}
+  
+  (get-single-issue {::id id}))
+
 (comment (get-single-issue params))
 
 (defn important-fieds->record [fields]
@@ -206,7 +215,7 @@
 
 (comment (->> (issues) ::issues (map ::title)))
 
-(def resolvers [issues start-sorting-issue sorted-issues])
+(def resolvers [issues start-sorting-issue sorted-issues single-issue-resolver])
 
 
 
