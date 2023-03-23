@@ -2,6 +2,7 @@
   (:require
    [ssorter.server-components.config :refer [config]]
    [ssorter.server-components.pathom :as pathom]
+   [ssorter.server-components.migrations :as mig]
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]
    [ring.util.response :as util]

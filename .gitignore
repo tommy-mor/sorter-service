@@ -7,6 +7,7 @@ self_nodes
 !resources/pr
 !resources/self_nodes
 target/
+app.jar
 
 secrets.edn
 

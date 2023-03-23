@@ -1,4 +1,4 @@
-(ns ssorter.server_components.migrations
+(ns ssorter.server-components.migrations
   (:require
    [ssorter.server-components.db :refer [db exec!]]
    [honey.sql.helpers :as h]
