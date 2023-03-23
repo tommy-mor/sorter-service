@@ -1,5 +1,6 @@
 (ns ssorter.server-components.migrations.old-importer
-  (:require [jsonista.core :as j]))
+  (:require [jsonista.core :as j]
+            [clojure.java.io :as io]))
 
 (def mapper
   (j/object-mapper
@@ -38,9 +39,9 @@
       ffirst
       decode-v))
 
-(def items (delay (parse-file "src/test/ssorter/items.json")))
+(def items (delay (parse-file (io/resource "items.json"))))
 (def id->item (delay (into {} (map (juxt :id identity) @items))))
-(def votes (delay (parse-file "src/test/ssorter/votes.json")))
+(def votes (delay (parse-file (io/resource "votes.json"))))
 (def id->vote (delay (into {} (map (juxt :id identity) @votes))))
 
 (def fruits-id "16c5f113-66cc-4514-8df0-4092a99285c0")
@@ -70,4 +71,3 @@
          (map :name)
          first)))
 
- 
