@@ -95,4 +95,3 @@
                                   score (get energies idx)]]
                         [item score]))))
 
-

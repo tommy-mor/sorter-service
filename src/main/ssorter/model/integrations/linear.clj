@@ -72,15 +72,18 @@
       :data :issue))
 
 (pco/defresolver single-issue-resolver [env {::keys [id]}]
-  {::pco/output [[::id
-                  ::title
-                  ::identifier
-                  ::description
-                  ::url]]}
+  {::pco/input [::id]
+   ::pco/output [::id
+                 ::title
+                 ::identifier
+                 ::description
+                 ::url]}
   
-  (get-single-issue {::id id}))
+  (wrap-keywords (get-single-issue {::id id})))
 
-(comment (get-single-issue params))
+(comment
+  (single-issue-resolver {::id "895f6154-f3b1-4ece-a6e7-9845e3bc27ee"})
+  (wrap-keywords (get-single-issue {::id "895f6154-f3b1-4ece-a6e7-9845e3bc27ee"})))
 
 (defn important-fieds->record [fields]
   (def fields fields)
