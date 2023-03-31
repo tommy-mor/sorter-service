@@ -2,6 +2,8 @@
   (:require 
    [ssorter.client.util :as util]
    
+   [com.fulcrologic.fulcro.mutations :refer [defmutation returning]]
+   
    [com.fulcrologic.fulcro.algorithms.merge :as merge]
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
@@ -17,6 +19,29 @@
    
    [com.fulcrologic.semantic-ui.factories :as f]
    [clojure.contrib.humanize :refer [datetime]]))
+
+(defmutation start-sorting-issue [issue]
+  (action [{:keys [state] :as env}] (println "starting to sort issue" issue) state)
+  (remote [env] true))
+
+(defmutation create [vote]
+  (action [{:keys [state] :as env}]
+          (println "sending vote.." (pr-str vote) )
+          state)
+  (remote [env] (returning env 'ssorter.model.tags/Tag {:query-params {:tags/id (:tags/id vote)}})))
+
+(defmutation sync [tag]
+  (remote [env] true)
+  (ok-action [env]
+             (def x env)
+             (set! (.. (.getElementById js/document "debuglog") -innerHTML) (-> x :result :body vals
+                                                                                first
+                                                                                str))
+             (println "ok action"))
+  (action [{:keys [state]}]
+          (println "epic")
+          state))
+
 
 (defsc SortedIssue [this props]
   {:ident ::id

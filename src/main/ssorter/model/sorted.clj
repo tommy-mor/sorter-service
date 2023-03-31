@@ -20,6 +20,7 @@
   (* elo n 10))
 
 (defn sorted-by-ids [ids]
+  (def ids ids)
   (def votes (exec! (-> (h/select :left_item_id :right_item_id :magnitude :id :attribute)
                         (h/from :votes)
                         (h/where [:in :votes.left_item_id ids]

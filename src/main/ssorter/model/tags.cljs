@@ -42,7 +42,7 @@
                                           (str "unsorted ("
                                                (count (:sorted/unsorted props))
                                                ")"))
-                    #_(f/ui-accordion-content {:active (= 1 segment)
+                    (f/ui-accordion-content {:active (= 1 segment)
                                              :style {:padding 0}}
                                             (m.items/ui-item-list {:list (:sorted/unsorted props)
                                                                    :title "unsorted"})))))
@@ -54,6 +54,7 @@
    :query [:tags/id
            :tags/title
            :tags/slug
+           :tags/domain_pk_namespace
            {:tags/sorted (comp/get-query Sorted)}
            {:tags/pair (comp/get-query m.pairs/Pair)}
            {:tags/votes (comp/get-query m.votes/Vote)}]
@@ -71,6 +72,11 @@
                                              (:tags/title props))
                                 (:tags/description props)
                                 (:tags/slug props))
+                  (when (= "linear.issue" (:tags/domain_pk_namespace props))
+                    (f/ui-segment {}
+                                  (dom/pre {:id "debuglog" :style {:margin 0 }})
+                                  (f/ui-button {:fluid true
+                                                   :onClick #(transact! this [(ssorter.model.integrations.linear/sync props)])} "sync!")))
                   (ui-sorted (:tags/sorted props))
                   (m.pairs/ui-pair (:tags/pair props))
                   (m.votes/ui-vote-list {:list (:tags/votes props)

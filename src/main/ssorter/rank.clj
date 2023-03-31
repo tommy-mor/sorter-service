@@ -88,10 +88,20 @@
        (apply concat)))
 
 (defn sorted [items votes]
-  (let [edges (votes->edges votes)
-        energies (pagerank edges)]
-    (sort-by second > (for [item items
-                            :let [idx (:items/id item)
-                                  score (get energies idx)]]
-                        [item score]))))
+  "TODO test this with small/empty inputs..."
+  (def items items)
+  (def votes votes)
+  (try 
+    (when (and (not-empty items)
+               (not-empty votes))
+      (let [edges (votes->edges votes)
+            energies (pagerank edges)]
+        (def edges edges)
+        (def energies energies)
+        (sort-by second > (for [item items
+                                :let [idx (:items/id item)
+                                      score (get energies idx)]]
+                            [item score]))))
+    (catch Exception e
+      [])))
 

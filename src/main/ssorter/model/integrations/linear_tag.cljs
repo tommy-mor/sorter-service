@@ -34,17 +34,12 @@
                                                {:post-mutation `dr/target-ready
                                                 :post-mutation-params {:target
                                                                        [::lin/id issue-id]}})))}
-  #_ (f/ui-container {}
-                     (f/ui-segment {}
-                                   (f/ui-header {:as "h2"}
-                                                (:tags/title props))
-                                   (:tags/description props)
-                                   (:tags/slug props))
-                     (ui-sorted (:tags/sorted props))
-                     (m.pairs/ui-pair (:tags/pair props))
-                     (m.votes/ui-vote-list {:list (:tags/votes props)
-                                            :tags/id (:tags/id props)}))
-  (dom/pre (pr-str props)))
+  (f/ui-container {}
+                  (f/ui-segment {}
+                                (f/ui-header {:as "h2"}
+                                             (::lin/title props)))
+                  (dom/pre "TODO jakeify")
+                  (f/ui-button {:onClick #(transact! this [(lin/start-sorting-issue props)])} "Sort!" )))
 
 
 

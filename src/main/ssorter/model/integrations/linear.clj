@@ -94,6 +94,9 @@
    :items/domain_pk_namespace "linear.issue"
    :items/access 0})
 
+(defn test []
+  (println "arstarst"))
+
 (defn sync-linear-parent-with-tag [{tagid :tags/id linearid ::id}]
   (def tagid tagid)
   (def linearid linearid)
@@ -147,8 +150,24 @@
     
     itemids))
 
+(pco/defmutation sync [{tagid :tags/id :as props}]
+  (def tagid tagid)
+  (log/info "syncinhg!!" props)
+  (def linearid (-> (exec! (-> (h/select :tags/domain_pk)
+                               (h/from :tags)
+                               (h/where [:= tagid :tags.id])))
+                    first :tags/domain_pk))
+  {:log (with-out-str (sync-linear-parent-with-tag {:tags/id tagid ::id linearid}))})
+
 (pco/defmutation start-sorting-issue [params]
+  
   (def params params)
+
+  (assert (= 0 (-> (h/select :*)
+                   (h/from :tags)
+                   (h/where [:= :domain_pk (::id params)])
+                   exec!
+                   count)))
   (def issue (get-single-issue params))
   (def tagid (-> (m.tags/create {:tags/title (str "linear.issue/" (:identifier issue) " - " (:title issue))
                                  :tags/description (:description issue)
@@ -218,7 +237,7 @@
 
 (comment (->> (issues) ::issues (map ::title)))
 
-(def resolvers [issues start-sorting-issue sorted-issues single-issue-resolver])
+(def resolvers [issues start-sorting-issue sorted-issues single-issue-resolver sync])
 
 
 
