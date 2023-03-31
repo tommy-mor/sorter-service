@@ -9,5 +9,5 @@
   {:task (shell "clojure -T:build ci") }
 
   up
-  {:task (shell "scp target/app.jar root@sorter.isnt.online:/root/app.jar")} }}
+  {:task (shell "scp target/app.jar root@mge.tf:/root/app.jar")} }}
 

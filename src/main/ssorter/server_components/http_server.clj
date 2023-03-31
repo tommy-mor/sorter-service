@@ -12,7 +12,7 @@
 
 (defstate http-server
   :start
-  (let [cfg (:http-options/TODO config)]
+  (let [cfg (:http-options config)]
     (log/info "starting http server with options" (pr-str cfg))
-    (http/run-server middleware {:port 8080}))
+    (http/run-server middleware {:port (:port cfg)}))
   :stop (http-server))
