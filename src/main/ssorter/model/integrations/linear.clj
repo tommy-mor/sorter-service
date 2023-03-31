@@ -106,6 +106,8 @@
                        :data :issue :children :nodes
                        (map (juxt :id (comp t/inst :updatedAt)))
                        (into {})))
+  
+  (println "linear task ids" linear-ids)
 
   (when (empty? linear-ids)
     (throw (ex-info "no subissues" {::id linearid :tags/id tagid})))
