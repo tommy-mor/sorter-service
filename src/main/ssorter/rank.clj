@@ -104,5 +104,5 @@
                             [item score]))))
     (catch Exception e
       (log/error "failed to sort.." e)
-      [])))
+      (sort-by second > (for [item items] [item (/ (rand) (count items) 4) ])))))
 

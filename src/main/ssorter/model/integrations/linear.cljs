@@ -31,13 +31,16 @@
   (remote [env] (returning env 'ssorter.model.tags/Tag {:query-params {:tags/id (:tags/id vote)}})))
 
 (defmutation sync [tag]
-  (remote [env] true)
+  (remote [env]
+          (returning env 'ssorter.model.tags/Tag {:query-params {:tags/id (:tags/id tag)}}))
+  
   (ok-action [env]
              (def x env)
-             (set! (.. (.getElementById js/document "debuglog") -innerHTML) (-> x :result :body vals
-                                                                                first
-                                                                                str))
+             "TODO fix? ask in discord what to do..."
+             (set! (.. (.getElementById js/document "debuglog") -innerHTML)
+                   (count (-> x :result :body vals first)))
              (println "ok action"))
+  
   (action [{:keys [state]}]
           (println "epic")
           state))

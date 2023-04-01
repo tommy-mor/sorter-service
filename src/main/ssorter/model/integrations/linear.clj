@@ -8,6 +8,8 @@
             [ssorter.model.tags :as m.tags]
             [ssorter.model.membership :as m.membership]
             [ssorter.model.items :as m.items]
+            
+            [ssorter.model.sorted :as m.sorted]
 
             [ssorter.sync :as sync]
             
@@ -97,6 +99,19 @@
 (defn test []
   (println "arstarst"))
 
+(comment
+  linearid
+  (->> (linear-req {:queries [[:issue {:id linearid}
+                               [[:children [[:nodes [:title :id :subIssueSortOrder]]]]]]]})
+       :data :issue :children :nodes
+       clojure.pprint/pprint)
+  (def fst "963c22b9-55a0-4187-98d2-7d4db4841152")
+  (linear-req {:queries [[:issue {:id fst} [:title :subIssueSortOrder]]]})
+  (linear-req {:operation {:operation/type :mutation
+                           :operation/name "ChangeSort"}
+               :queries [[:issueUpdate {:id fst :input {:subIssueSortOrder -1}}
+                          [[:issue [:title]]]]]} ))
+
 (defn sync-linear-parent-with-tag [{tagid :tags/id linearid ::id}]
   (def tagid tagid)
   (def linearid linearid)
@@ -107,7 +122,7 @@
                        (map (juxt :id (comp t/inst :updatedAt)))
                        (into {})))
   
-  (println "linear task ids" linear-ids)
+  (println (str (count linear-ids) " linear tasks"))
 
   (when (empty? linear-ids)
     (throw (ex-info "no subissues" {::id linearid :tags/id tagid})))
@@ -115,6 +130,8 @@
   (def existing-members ((fn [] (->> (m.membership/tag-members {:tags/id tagid})
                                      :tags/members
                                      (map m.items/item)))))
+  
+  (println (str (count existing-members) " existing sorter items"))
 
   (def existinglinearid->edited (into {} (map (juxt :items/domain_pk :items/edited_at) existing-members)))
 
@@ -124,6 +141,11 @@
         (sync/split-by-inst linear-ids existinglinearid->edited)
 
         to-fetch (clojure.set/union new-from-linear needs-updating)]
+
+    (println (count new-from-linear) "new items from linear")
+    (when (not-empty new-from-linear) (println (pr-str new-from-linear)))
+    (println (count obsolete-items) "items no longer in linear, to be deleted")
+    (println (count needs-updating) "items that need updating (dates don't align)")
     
     (def issue-data (->> (linear-req {:queries [[:issues {:filter {:id {:in to-fetch}}}
                                                  [[:nodes
@@ -149,6 +171,10 @@
 
     (when (not-empty itemids)
       (m.membership/enroll-many-items (map #(assoc % :tags/id tagid) itemids) ))
+
+    (println (new java.util.Date))
+
+    (m.sorted/sorted-by-ids (map :items/id existing-members))
     
     itemids))
 
@@ -240,6 +266,3 @@
 (comment (->> (issues) ::issues (map ::title)))
 
 (def resolvers [issues start-sorting-issue sorted-issues single-issue-resolver sync])
-
-
-

@@ -73,6 +73,7 @@
                                 (:tags/description props)
                                 (:tags/slug props))
                   (when (= "linear.issue" (:tags/domain_pk_namespace props))
+                    "TODO GET RID OF THIS WART!!"
                     (f/ui-segment {}
                                   (dom/pre {:id "debuglog" :style {:margin 0 }})
                                   (f/ui-button {:fluid true
