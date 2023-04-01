@@ -194,7 +194,8 @@
                       (linear-req {:operation {:operation/type :mutation
                                                :operation/name "ChangeSort"}
                                    :queries [[:issueUpdate {:id (sorterid->linearid id)
-                                                            :input {:subIssueSortOrder score}}
+                                                            :input {:subIssueSortOrder score
+                                                                    :stateId todo-stateid}}
                                               [[:issue [:id :subIssueSortOrder]]
                                                :success]]]} ))))
 
@@ -207,12 +208,19 @@
       (for [[k v] linear]
         (= (get mine k) v)))
 
-    (for [{id :items/id} (:sorted/unsorted sorted)]
-      (do (linear-req {:operation {:operation/type :mutation
-                                   :operation/name "ChangeSort"}
-                       :queries [[:issueUpdate {:id (sorterid->linearid id) :input {:stateId backlog-stateid
-                                                                                    :subIssueSortOrder -99999.0}}
-                                  [[:issue [:title]]]]]} )))
+    (comment
+      (println "---")
+      (for [{score :items/score id :items/id} (:sorted/sorted sorted)]
+        (clojure.pprint/pprint (linear-req {:queries [[:issue {:id (sorterid->linearid id)}
+                                                       [:id :title :subIssueSortOrder]]]} ))))
+    
+
+    (doall (for [{id :items/id} (:sorted/unsorted sorted)]
+             (do (linear-req {:operation {:operation/type :mutation
+                                          :operation/name "ChangeSort"}
+                              :queries [[:issueUpdate {:id (sorterid->linearid id) :input {:stateId backlog-stateid
+                                                                                           :subIssueSortOrder -99999.0}}
+                                         [[:issue [:title]]]]]} ))))
 
     (println "updated thingies")
     
