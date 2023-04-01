@@ -103,5 +103,6 @@
                                       score (get energies idx)]]
                             [item score]))))
     (catch Exception e
+      (log/error "failed to sort.." e)
       [])))
 
