@@ -99,6 +99,9 @@
 (defn test []
   (println "arstarst"))
 
+(def todo-stateid "8310817e-bab3-4485-9591-73589b77baab")
+(def backlog-stateid "f23b2077-ecf1-40ee-8e26-70d60eb6fe9a")
+
 (comment
   linearid
   (->> (linear-req {:queries [[:issue {:id linearid}
@@ -106,10 +109,17 @@
        :data :issue :children :nodes
        clojure.pprint/pprint)
   (def fst "963c22b9-55a0-4187-98d2-7d4db4841152")
-  (linear-req {:queries [[:issue {:id fst} [:title :subIssueSortOrder]]]})
+  
+  (linear-req {:queries [[:issue {:id fst} [:title :subIssueSortOrder [ :state [:id]]]]]})
+  
   (linear-req {:operation {:operation/type :mutation
                            :operation/name "ChangeSort"}
                :queries [[:issueUpdate {:id fst :input {:subIssueSortOrder -1}}
+                          [[:issue [:title]]]]]} )
+  
+  (linear-req {:operation {:operation/type :mutation
+                           :operation/name "ChangeSort"}
+               :queries [[:issueUpdate {:id fst :input {:stateId todo-stateid}}
                           [[:issue [:title]]]]]} ))
 
 (defn sync-linear-parent-with-tag [{tagid :tags/id linearid ::id}]
@@ -130,6 +140,10 @@
   (def existing-members ((fn [] (->> (m.membership/tag-members {:tags/id tagid})
                                      :tags/members
                                      (map m.items/item)))))
+
+  (def sorterid->linearid (->>
+                           (map (juxt :items/id :items/domain_pk) existing-members)
+                           (into {})))
   
   (println (str (count existing-members) " existing sorter items"))
 
@@ -174,7 +188,34 @@
 
     (println (new java.util.Date))
 
-    (m.sorted/sorted-by-ids (map :items/id existing-members))
+    (def sorted (-> (m.sorted/sorted-by-ids (map :items/id existing-members))))
+
+    (def res (doall (for [{score :items/score id :items/id} (:sorted/sorted sorted)]
+                      (linear-req {:operation {:operation/type :mutation
+                                               :operation/name "ChangeSort"}
+                                   :queries [[:issueUpdate {:id (sorterid->linearid id)
+                                                            :input {:subIssueSortOrder score}}
+                                              [[:issue [:id :subIssueSortOrder]]
+                                               :success]]]} ))))
+
+    (let [linear (->> res
+                      (map #(-> % :data :issueUpdate :issue ((juxt :id :subIssueSortOrder))))
+                      (into {}))
+          mine
+          (->> sorted :sorted/sorted (map (juxt (comp sorterid->linearid :items/id) :items/score))
+               (into {}))]
+      (for [[k v] linear]
+        (= (get mine k) v)))
+
+    (for [{id :items/id} (:sorted/unsorted sorted)]
+      (do (linear-req {:operation {:operation/type :mutation
+                                   :operation/name "ChangeSort"}
+                       :queries [[:issueUpdate {:id (sorterid->linearid id) :input {:stateId backlog-stateid
+                                                                                    :subIssueSortOrder -99999.0}}
+                                  [[:issue [:title]]]]]} )))
+
+    (println "updated thingies")
+    
     
     itemids))
 
