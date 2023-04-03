@@ -99,18 +99,17 @@
 (defn test []
   (println "arstarst"))
 
-(def todo-stateid "8310817e-bab3-4485-9591-73589b77baab")
-(def backlog-stateid "f23b2077-ecf1-40ee-8e26-70d60eb6fe9a")
-
 (comment
   linearid
   (->> (linear-req {:queries [[:issue {:id linearid}
-                               [[:children [[:nodes [:title :id :subIssueSortOrder]]]]]]]})
+                               [[:children [[:nodes [:title :id :subIssueSortOrder
+                                                     [:state [:id :name :type]]]]]]]]]}
+                   )
        :data :issue :children :nodes
        clojure.pprint/pprint)
   (def fst "963c22b9-55a0-4187-98d2-7d4db4841152")
   
-  (linear-req {:queries [[:issue {:id fst} [:title :subIssueSortOrder [ :state [:id]]]]]})
+  (linear-req {:queries [[:issue {:id fst} [:title :subIssueSortOrder [ :state [:type]]]]]})
   
   (linear-req {:operation {:operation/type :mutation
                            :operation/name "ChangeSort"}
@@ -119,12 +118,22 @@
   
   (linear-req {:operation {:operation/type :mutation
                            :operation/name "ChangeSort"}
-               :queries [[:issueUpdate {:id fst :input {:stateId todo-stateid}}
+               :queries [[:issueUpdate {:id fst :input {:state todo-stateid}}
                           [[:issue [:title]]]]]} ))
 
 (defn sync-linear-parent-with-tag [{tagid :tags/id linearid ::id}]
   (def tagid tagid)
   (def linearid linearid)
+  
+  (def statename->id (->> (linear-req {:queries [[:workflowStates [[:nodes [:id :type]]]]]})
+                          :data
+                          :workflowStates
+                          :nodes
+                          (map (juxt :type :id))
+                          (into {})))
+  
+  (def todo-stateid (statename->id "unstarted"))
+  (def backlog-stateid (statename->id "backlog"))
 
   (def raw-linear-data (->> (linear-req {:queries [[:issue {:id linearid}
                                                     [[:children [[:nodes [:id :updatedAt [:state [:id]] :subIssueSortOrder]]]]]]]})

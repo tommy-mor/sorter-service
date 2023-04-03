@@ -64,6 +64,7 @@
 
 (def router
   (rring/router [["/" {:get {:handler (constantly {:status 200 :body (slurp (io/resource "public/index.html"))})}}]
+                 ["/sorter" {:get {:handler (constantly {:status 200 :body (slurp (io/resource "public/index.html"))})}}]
                  ["/assets/*" (rring/create-resource-handler)]
                  ["/api/v1" {:post {:handler fulcro-handler}
                              :get {:handler (constantly {:status 200 :body "apiiii"})}}]
