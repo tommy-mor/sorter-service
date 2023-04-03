@@ -126,9 +126,11 @@
   (def tagid tagid)
   (def linearid linearid)
 
-  (def linear-ids (->> (linear-req {:queries [[:issue {:id linearid}
-                                               [[:children [[:nodes [:id :updatedAt]]]]]]]})
-                       :data :issue :children :nodes
+  (def raw-linear-data (->> (linear-req {:queries [[:issue {:id linearid}
+                                                    [[:children [[:nodes [:id :updatedAt [:state [:id]] :subIssueSortOrder]]]]]]]})
+                            :data :issue :children :nodes))
+
+  (def linear-ids (->> raw-linear-data
                        (map (juxt :id (comp t/inst :updatedAt)))
                        (into {})))
   
@@ -213,16 +215,25 @@
       (for [{score :items/score id :items/id} (:sorted/sorted sorted)]
         (clojure.pprint/pprint (linear-req {:queries [[:issue {:id (sorterid->linearid id)}
                                                        [:id :title :subIssueSortOrder]]]} ))))
+
+    (def linearid->data (->> raw-linear-data
+                             (map (juxt :id identity))
+                             (into {})))
     
 
     (def res2 (doall (for [{id :items/id} (:sorted/unsorted sorted)]
-                       (do (linear-req {:operation {:operation/type :mutation
+                       (let [data (get linearid->data (sorterid->linearid id))]
+                         (when (or (and (#{backlog-stateid} (-> data :state :id))
+                                        (> (:subIssueSortOrder data) -9999))
+                                   (#{todo-stateid} (-> data :state :id)))
+                           (linear-req {:operation {:operation/type :mutation
                                                     :operation/name "ChangeSort"}
-                                        :queries [[:issueUpdate {:id (sorterid->linearid id)
-                                                                 :input {:stateId backlog-stateid
-                                                                         :subIssueSortOrder
-                                                                         (+ -99999.0 (rand)) }}
-                                                   [[:issue [:title]]]]]} )))))
+                                        :queries [[:issueUpdate
+                                                   {:id (sorterid->linearid id)
+                                                    :input {:stateId backlog-stateid
+                                                            :subIssueSortOrder
+                                                            (+ -99999.0 (rand)) }}
+                                                   [[:issue [:title]]]]]} ))))))
 
     (println "updated thingies")
     
