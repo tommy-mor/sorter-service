@@ -215,12 +215,14 @@
                                                        [:id :title :subIssueSortOrder]]]} ))))
     
 
-    (doall (for [{id :items/id} (:sorted/unsorted sorted)]
-             (do (linear-req {:operation {:operation/type :mutation
-                                          :operation/name "ChangeSort"}
-                              :queries [[:issueUpdate {:id (sorterid->linearid id) :input {:stateId backlog-stateid
-                                                                                           :subIssueSortOrder -99999.0}}
-                                         [[:issue [:title]]]]]} ))))
+    (def res2 (doall (for [{id :items/id} (:sorted/unsorted sorted)]
+                       (do (linear-req {:operation {:operation/type :mutation
+                                                    :operation/name "ChangeSort"}
+                                        :queries [[:issueUpdate {:id (sorterid->linearid id)
+                                                                 :input {:stateId backlog-stateid
+                                                                         :subIssueSortOrder
+                                                                         (+ -99999.0 (rand)) }}
+                                                   [[:issue [:title]]]]]} )))))
 
     (println "updated thingies")
     
