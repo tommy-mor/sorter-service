@@ -151,6 +151,8 @@
   (def existing-members ((fn [] (->> (m.membership/tag-members {:tags/id tagid})
                                      :tags/members
                                      (map m.items/item)))))
+  
+  (->> existing-members (map :items/title))
 
   (def sorterid->linearid (->>
                            (map (juxt :items/id :items/domain_pk) existing-members)
@@ -194,6 +196,12 @@
                 (map #(hash-map :items/domain_pk %))
                 (map m.items/delete)))
 
+    (def linearid->sorterid (->> sorterid->linearid (map (fn [[k v]] [v k])) (into {})))
+    
+    (def completedid (doall (->> raw-linear-data
+                                 (map (comp :id :state))
+                                 (filter #{(statename->id "completed")})
+                                 first)))
     (when (not-empty itemids)
       (m.membership/enroll-many-items (map #(assoc % :tags/id tagid) itemids) ))
 
