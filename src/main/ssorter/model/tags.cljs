@@ -78,8 +78,8 @@
                                   (dom/pre {:id "debuglog" :style {:margin 0 }})
                                   (f/ui-button {:fluid true
                                                    :onClick #(transact! this [(ssorter.model.integrations.linear/sync props)])} "sync!")))
-                  (ui-sorted (:tags/sorted props))
                   (m.pairs/ui-pair (:tags/pair props))
+                  (ui-sorted (:tags/sorted props))
                   (m.votes/ui-vote-list {:list (:tags/votes props)
                                          :tags/id (:tags/id props)})))
 

@@ -37,7 +37,7 @@
    :always-render-body? true}
   (def xx props)
   (comp/fragment
-   (f/ui-segment {} (f/ui-breadcrumb {}
+   #_(f/ui-segment {} (f/ui-breadcrumb {}
                                      (let [segments (-> props :router-state :path-segment)]
                                        (when segments
                                          (->> (map (fn [title link]
