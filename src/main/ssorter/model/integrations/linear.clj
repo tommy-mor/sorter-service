@@ -315,6 +315,9 @@
                             ::children
                             ::identifier
                             :tags/id]}]}
+  (when-not (-> env :ring/request :session :session/valid?)
+    (throw (ex-info "not logged in!" {})))
+  
   (let [{:keys [before after onlyParents?] :as param} (pco/params env)
         params (cond before {:before before :last 10}
                      after {:after after :first 10}
