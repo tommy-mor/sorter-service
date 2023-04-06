@@ -296,7 +296,10 @@
 (pco/defresolver sorted-issues [env _]
   {::pco/output [{::sorted-issues [::id
                                    :tags/id]}]}
-  
+
+  (when-not (-> env :ring/request :session :session/valid?)
+    (throw (ex-info "not logged in!" {})))
+
   {::sorted-issues (->> (exec! (-> (h/select :id :domain_pk)
                                    (h/from :tags)
                                    (h/where [:= :domain_pk_namespace "linear.issue"])))

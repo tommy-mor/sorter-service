@@ -29,10 +29,12 @@
   "TODO make item insert idempotent (insert and look for tag)")
 
 (defn fill-database []
+
   (exec! (-> (h/insert-into :users)
              (h/values [{:user_name "tommy"
                          :email "thmorriss@gmail.com"
-                         :password_hash "$2a$11$7upXjLlYoBpMwkJXKska7usiBcd3j.bL7BTjr7F4gywYuO/KT0sE2"}])
+                         :password_hash
+                         "$2a$11$Lrwqg86XlBahlQOhDlI9EeM5Gfdniw19M5Bcer0gCQKqy1biVtAKS"}])
 
              (h/upsert (-> (h/on-conflict :user_name)
                            (h/do-nothing)))))

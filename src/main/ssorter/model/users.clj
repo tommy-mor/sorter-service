@@ -46,7 +46,6 @@
 (pco/defmutation login [env {:keys [username password]}]
   {::pco/output [:session/valid? :users/user_name]}
   (log/info "Authenticating" username)
-  
   (let [hash (-> (h/select :password_hash)
                  (h/from :users)
                  (h/where [:= :user_name username])
@@ -63,7 +62,6 @@
 (pco/defmutation logout [env params]
   {::pco/output [:session/valid?]}
   (response-updating-session env {:session/valid? false :account/name ""}))
-
 
 (def resolvers [current-session-resolver login logout])
 
