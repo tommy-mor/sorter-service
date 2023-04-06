@@ -6,6 +6,7 @@
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]
    [ring.util.response :as util]
+   [ring.middleware.session :as session]
    [com.fulcrologic.fulcro.server.api-middleware :refer [handle-api-request]]
    #_[ssorter.server-components.phrag :refer [phrag]]
    [reitit.ring :as rring]
@@ -73,11 +74,13 @@
                                                  (slurp (io/resource "templates/gql.html"))})}
                                 :post {:handler phrag}}]]
                 {:data {:muuntaja m/instance
-                        :middleware [m.m/wrap-exception ;; REEEEEEEEEEEEEEEEEEEEEEEEEEEEE pls help me.....
+                        :middleware [session/wrap-session
+                                     m.m/wrap-exception ;; REEEEEEEEEEEEEEEEEEEEEEEEEEEEE pls help me.....
                                      muuntaja/format-negotiate-middleware
                                      
                                      muuntaja/format-response-middleware
                                      exception-middleware
+                                     
                                      muuntaja/format-request-middleware]}}))
 
 (defstate middleware
