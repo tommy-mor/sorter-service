@@ -22,7 +22,7 @@
   
   (app/set-root! app ui/Root {:initialize-state? true})
   (dr/initialize! app)
-  (dr/change-route! app ["linear.issues"])
+  (dr/change-route! app ["tags"])
   (uism/begin! app users/session-machine ::users/session
                {:actor/login-form ui/Login
                 :actor/current-session ui/Session})

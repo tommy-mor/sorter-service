@@ -72,12 +72,6 @@
                                              (:tags/title props))
                                 (:tags/description props)
                                 (:tags/slug props))
-                  (when (= "linear.issue" (:tags/domain_pk_namespace props))
-                    "TODO GET RID OF THIS WART!!"
-                    (f/ui-segment {}
-                                  (dom/pre {:id "debuglog" :style {:margin 0 }})
-                                  (f/ui-button {:fluid true
-                                                   :onClick #(transact! this [(ssorter.model.integrations.linear/sync props)])} "sync!")))
                   (m.pairs/ui-pair (:tags/pair props))
                   (ui-sorted (:tags/sorted props))
                   (m.votes/ui-vote-list {:list (:tags/votes props)
@@ -88,8 +82,13 @@
 (defsc TagList [this props]
   {:ident (fn [] [:component/id :TagList])
    :initial-state {:tags []}
-   :query [{:tags (comp/get-query Tag)}]}
-  "this is never used, because we use the data loaded here in ssorter.client.ui")
+   :query [{:tags (comp/get-query Tag)}]
+   :route-segment ["tags"]}
+  
+  (f/ui-container {}
+                  (f/ui-segment {}
+                                (f/ui-header {:as "h2"}
+                                             (pr-str props)))))
 
 (defn load [app & [params]]
   ;; TODO do a pre merge filter so i don't merge in empty list..

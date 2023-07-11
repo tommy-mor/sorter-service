@@ -48,7 +48,7 @@
 
 
 (defrouter RootRouter [this props]
-  {:router-targets [linear/IssueList m.tags/Tag linear-tag/LinearTag]
+  {:router-targets [m.tags/TagList linear/IssueList m.tags/Tag #_linear-tag/LinearTag]
    :always-render-body? true}
   (comp/fragment
    #_(f/ui-segment {} (f/ui-breadcrumb {}
