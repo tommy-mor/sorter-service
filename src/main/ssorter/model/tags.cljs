@@ -83,7 +83,13 @@
   {:ident (fn [] [:component/id :TagList])
    :initial-state {:tags []}
    :query [{:tags (comp/get-query Tag)}]
-   :route-segment ["tags"]}
+   :route-segment ["tags"]
+   :will-enter (fn [app route-params]
+                 (println "this is being run")
+                 (dr/route-deferred
+                  [:component/id :TagList]
+                  #(df/load! app :tags TagList
+                             {:post-mutation `dr/target-ready})))}
   
   (f/ui-container {}
                   (f/ui-segment {}
