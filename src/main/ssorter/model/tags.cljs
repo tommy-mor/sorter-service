@@ -79,10 +79,20 @@
 
 (def ui-tag (comp/factory Tag))
 
+(defsc TagRow [this props]
+  {:ident :tags/id
+   :query [:tags/id
+           :tags/title]}
+  (f/ui-table-row {:style {:cursor "pointer"
+                           :positive true}}
+                  (f/ui-table-cell {:singleLine true} (:tags/title props))))
+
+(def ui-tag-row (comp/factory TagRow))
+
 (defsc TagList [this props]
   {:ident (fn [] [:component/id :TagList])
    :initial-state {:tags []}
-   :query [{:tags (comp/get-query Tag)}]
+   :query [{:tags (comp/get-query TagRow)}]
    :route-segment ["tags"]
    :will-enter (fn [app route-params]
                  (println "this is being run")
@@ -91,10 +101,30 @@
                   #(df/load! app :tags TagList
                              {:post-mutation `dr/target-ready})))}
   
-  (f/ui-container {}
-                  (f/ui-segment {}
-                                (f/ui-header {:as "h2"}
-                                             (pr-str props)))))
+  (f/ui-container
+   {}
+
+   (f/ui-table
+    {:celled true :striped true :compact true :selectable true}
+    (->> "Issues"
+         (f/ui-table-header-cell {:colSpan 100} (f/ui-loader {:active false}))
+         (f/ui-table-row nil)
+         (f/ui-table-header nil))
+    
+    (f/ui-table-body nil
+                     (concat
+                      (->> props
+                           :tags
+                           (map ui-tag-row))))
+    (comment (->>
+              (f/ui-menu {:pagination true
+                          :size "mini"
+                          :fluid true}
+                         left-arrow
+                         right-arrow)
+              (f/ui-table-header-cell {:colSpan 100})
+              (f/ui-table-row nil)
+              (f/ui-table-footer nil))))))
 
 (defn load [app & [params]]
   ;; TODO do a pre merge filter so i don't merge in empty list..
