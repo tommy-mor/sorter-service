@@ -85,7 +85,9 @@
            :tags/title]}
   (f/ui-table-row {:style {:cursor "pointer"
                            :positive true}}
-                  (f/ui-table-cell {:singleLine true} (:tags/title props))))
+                  (f/ui-table-cell {:singleLine true
+                                    :onClick #(dr/change-route this
+                                                               ["tag" (:tags/id props)])} (:tags/title props))))
 
 (def ui-tag-row (comp/factory TagRow {:keyfn :tags/id}))
 
@@ -99,7 +101,8 @@
                  (dr/route-deferred
                   [:component/id :TagList]
                   #(df/load! app :tags TagList
-                             {:post-mutation `dr/target-ready})))}
+                             {:post-mutation `dr/target-ready
+                              :post-mutation-params {:target [:component/id :TagList]}})))}
   
   (f/ui-container
    {}
