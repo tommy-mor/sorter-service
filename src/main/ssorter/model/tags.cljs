@@ -87,7 +87,7 @@
                            :positive true}}
                   (f/ui-table-cell {:singleLine true} (:tags/title props))))
 
-(def ui-tag-row (comp/factory TagRow))
+(def ui-tag-row (comp/factory TagRow {:keyfn :tags/id}))
 
 (defsc TagList [this props]
   {:ident (fn [] [:component/id :TagList])
