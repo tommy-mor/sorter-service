@@ -150,10 +150,13 @@
      (let [menu (f/ui-menu {:vertical false
                             :attached "bottom"}
                            (f/ui-menu-item {:link true
+                                            :onClick #(nav-to ["tags"])} "all items")
+                           (f/ui-menu-item {:link true
                                             :onClick #(nav-to ["linear.issues"])} "linear/issues")
                            (f/ui-menu-item {:link true
                                             :onClick #(nav-to ["youtube.videos"])} "youtube")
                            (ui-login (:root/login props)))]
+       
        (->> (f/ui-grid {}
                        (f/ui-grid-row {:centered true}
                                       (f/ui-grid-column {} menu))
